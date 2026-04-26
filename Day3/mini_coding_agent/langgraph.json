@@ -1,0 +1,12 @@
+{
+  "dependencies": [
+    ".",
+    "langchain-openai",
+    "langgraph",
+    "pytest"
+  ],
+  "graphs": {
+    "coding_agent": "./graph.py:graph"
+  },
+  "env": "../.env"
+}
