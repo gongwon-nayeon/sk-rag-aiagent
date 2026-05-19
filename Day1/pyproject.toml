@@ -2,7 +2,7 @@
 name = "llm-day1"
 version = "1.0.0"
 description = "SK-RAG-AI Agent 교육 - Day 1"
-requires-python = ">=3.11"
+requires-python = ">=3.13,<3.14"
 dependencies = [
     "langchain>=1.0.0",
     "langchain-openai>=1.0.0",
