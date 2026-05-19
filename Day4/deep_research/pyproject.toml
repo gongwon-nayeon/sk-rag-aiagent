@@ -2,7 +2,7 @@
 name = "deep-research-example"
 version = "0.1.0"
 description = "Deep research agent example using deepagents package"
-requires-python = ">=3.11"
+requires-python = ">=3.13,<3.14"
 dependencies = [
     "langchain-openai>=1.0.2",
     "langchain_tavily>=0.2.13",
