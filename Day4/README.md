@@ -54,10 +54,6 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 
 ### 2. 가상환경 생성 및 패키지 설치
 
-Day4 폴더로 이동한 후 아래 방법 중 하나를 선택하세요.
-
-#### 방법 1: uv sync 사용 (권장)
-
 ```bash
 # Day4 폴더로 이동
 cd Day4
@@ -70,22 +66,6 @@ uv sync
 
 # 가상환경 활성화 (macOS/Linux)
 source .venv/bin/activate
-```
-
-#### 방법 2: requirements.txt 사용
-
-```bash
-# 가상환경 생성
-uv venv
-
-# 가상환경 활성화 (Windows)
-.venv\Scripts\activate
-
-# 가상환경 활성화 (macOS/Linux)
-source .venv/bin/activate
-
-# 패키지 설치
-uv pip install -r requirements.txt
 ```
 
 ---
