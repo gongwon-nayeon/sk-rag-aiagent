@@ -2,7 +2,7 @@
 name = "llm-day4"
 version = "1.0.0"
 description = "SK-RAG-AI Agent 교육 - Day 4"
-requires-python = ">=3.11"
+requires-python = ">=3.13,<3.14"
 dependencies = [
     "deepagents>=0.5.0",
     "langchain>=0.3.0",
