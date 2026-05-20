@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SK RAG AI Agent 교육 - 사전 설치 가이드</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.8;
+            color: #0a0a0a;
+            background: #faf8f4;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #faf8f4;
+        }
+
+        header {
+            background: #0a0a0a;
+            color: #faf8f4;
+            padding: 100px 50px 80px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 4em;
+            margin-bottom: 20px;
+            font-weight: 900;
+            letter-spacing: -0.04em;
+            line-height: 1.1;
+        }
+
+        header p {
+            font-size: 1.4em;
+            font-weight: 500;
+            opacity: 0.8;
+        }
+
+        .content {
+            padding: 80px 50px;
+            background: #faf8f4;
+        }
+
+        .os-selector {
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 0;
+            margin-bottom: 60px;
+            border: 2px solid #0a0a0a;
+            text-align: center;
+        }
+
+        .os-selector h3 {
+            font-size: 1.3em;
+            margin-bottom: 24px;
+            color: #0a0a0a;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .os-tabs {
+            display: inline-flex;
+            gap: 16px;
+            background: transparent;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        .os-tab {
+            padding: 16px 48px;
+            background: #faf8f4;
+            border-radius: 0;
+            font-weight: 700;
+            color: #0a0a0a;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid #0a0a0a;
+        }
+
+        .os-tab.active {
+            background: #0a0a0a;
+            color: #faf8f4;
+            box-shadow: none;
+        }
+
+        .os-tab:hover:not(.active) {
+            background: #e5e5e5;
+            color: #0a0a0a;
+        }
+
+        .notice {
+            background: #508D4E;
+            border-left: none;
+            padding: 32px 40px;
+            margin-bottom: 60px;
+            border-radius: 0;
+            box-shadow: none;
+        }
+
+        .notice h2 {
+            color: #ffffff;
+            margin-bottom: 12px;
+            font-size: 1.3em;
+            font-weight: 800;
+        }
+
+        .notice p {
+            color: #ffffff;
+            font-size: 1.1em;
+            line-height: 1.8;
+        }
+
+        .section {
+            margin-bottom: 80px;
+        }
+
+        .section h2 {
+            color: #0a0a0a;
+            font-size: 2.8em;
+            margin-bottom: 50px;
+            font-weight: 900;
+            letter-spacing: -0.04em;
+            line-height: 1.1;
+        }
+
+        .install-item {
+            background: #ffffff;
+            border: 2px solid #0a0a0a;
+            border-radius: 0;
+            padding: 50px;
+            margin-bottom: 32px;
+            transition: all 0.2s ease;
+            box-shadow: none;
+        }
+
+        .install-item:hover {
+            border-color: #508D4E;
+            box-shadow: 8px 8px 0 rgba(80, 141, 78, 0.2);
+            transform: translate(-4px, -4px);
+        }
+
+        .install-item h3 {
+            color: #0a0a0a;
+            font-size: 2em;
+            margin-bottom: 32px;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            letter-spacing: -0.03em;
+        }
+
+        .version-badge {
+            background: #508D4E;
+            color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 0;
+            font-size: 0.6em;
+            margin-left: 16px;
+            font-weight: 700;
+        }
+
+        .download-link {
+            display: inline-block;
+            background: #0a0a0a;
+            color: #faf8f4;
+            padding: 16px 40px;
+            text-decoration: none;
+            border-radius: 0;
+            font-weight: 700;
+            margin-top: 24px;
+            margin-left: 12px;
+            transition: all 0.2s ease;
+            font-size: 1em;
+            box-shadow: none;
+            border: 2px solid #0a0a0a;
+        }
+
+        .download-link:hover {
+            transform: none;
+            background: #508D4E;
+            border-color: #508D4E;
+            box-shadow: none;
+        }
+
+        .step-list {
+            list-style: none;
+        }
+
+        .step-list li {
+            margin-bottom: 32px;
+            padding-left: 0;
+            position: relative;
+            color: #4a5568;
+            line-height: 1.8;
+            font-size: 1.05em;
+        }
+
+        .step-list li strong {
+            color: #0a0a0a;
+            font-weight: 700;
+        }
+
+        .python-version-note {
+            background: #fffaeb;
+            border: 2px solid #0a0a0a;
+            padding: 24px 30px;
+            margin: 24px 0;
+            border-radius: 0;
+        }
+
+        .python-version-note p {
+            color: #0a0a0a;
+            margin: 0;
+            line-height: 1.8;
+            font-size: 1.05em;
+        }
+
+        .python-version-note strong {
+            font-weight: 800;
+            color: #508D4E;
+        }
+
+        .python-screenshot {
+            width: 100%;
+            max-width: 800px;
+            margin: 24px auto;
+            display: block;
+            border: 2px solid #0a0a0a;
+        }
+
+        .os-content {
+            display: none;
+        }
+
+        .os-content.active {
+            display: block;
+        }
+
+        .command-box {
+            background: #0a0a0a;
+            color: #faf8f4;
+            padding: 28px 32px;
+            border-radius: 0;
+            font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+            margin: 24px 0;
+            overflow-x: auto;
+            font-size: 1em;
+            box-shadow: none;
+            border: 2px solid #0a0a0a;
+        }
+
+        .command-box code {
+            color: #508D4E;
+            font-weight: 600;
+        }
+
+        .info-box {
+            background: #e8f5e9;
+            border-left: none;
+            padding: 28px 32px;
+            margin: 28px 0;
+            border-radius: 0;
+            box-shadow: none;
+            border: 2px solid #508D4E;
+        }
+
+        .info-box p {
+            color: #0a0a0a;
+            margin: 0;
+            line-height: 1.8;
+            font-size: 1.05em;
+        }
+
+        .info-box strong {
+            color: #0a0a0a;
+            font-weight: 800;
+        }
+
+        .checklist {
+            background: #508D4E;
+            border-left: none;
+            padding: 40px;
+            border-radius: 0;
+            margin-top: 50px;
+            box-shadow: none;
+        }
+
+        .checklist h3 {
+            color: #ffffff;
+            margin-bottom: 28px;
+            font-size: 1.6em;
+            font-weight: 900;
+        }
+
+        .checklist ul {
+            list-style: none;
+        }
+
+        .checklist li {
+            padding: 14px 0;
+            padding-left: 40px;
+            position: relative;
+            color: #ffffff;
+            font-size: 1.1em;
+            line-height: 1.7;
+        }
+
+        .checklist li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #ffffff;
+            font-weight: bold;
+            font-size: 1.5em;
+        }
+
+        footer {
+            background: #0a0a0a;
+            padding: 60px;
+            text-align: center;
+            color: #faf8f4;
+            font-size: 1em;
+        }
+
+        footer p {
+            margin-bottom: 10px;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 0;
+            }
+
+            header {
+                padding: 60px 30px 40px;
+            }
+
+            header h1 {
+                font-size: 2.5em;
+            }
+
+            header p {
+                font-size: 1.2em;
+            }
+
+            .content {
+                padding: 50px 30px;
+            }
+
+            .install-item {
+                padding: 35px 30px;
+            }
+
+            .section h2 {
+                font-size: 2.2em;
+            }
+
+            .os-tabs {
+                flex-direction: column;
+                width: 100%;
+                gap: 12px;
+            }
+
+            .os-tab {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>SK RAG AI Agent 교육</h1>
+            <p>사전 설치 가이드</p>
+        </header>
+
+        <div class="content">
+            <div class="notice">
+                <h2>교육 전 필수 확인 사항</h2>
+                <p>원활한 교육 진행을 위해 <strong>교육 시작 전</strong>에 아래 프로그램들을 설치해주시기 바랍니다.</p>
+            </div>
+
+            <div class="os-selector">
+                <h3>운영체제를 선택하세요</h3>
+                <div class="os-tabs">
+                    <button class="os-tab active" onclick="switchOS('windows')">Windows</button>
+                    <button class="os-tab" onclick="switchOS('macos')">macOS</button>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>필수 설치 프로그램</h2>
+
+                <!-- uv -->
+                <div class="install-item">
+                    <h3>
+                        uv (Python 패키지 관리자)
+                        <span class="version-badge">Python 자동 관리</span>
+                    </h3>
+
+                    <div class="python-version-note" style="margin-bottom: 28px;">
+                        <p><strong>💡 Python 설치 불필요!</strong><br>
+                        uv는 Python 버전을 자동으로 다운로드하고 관리합니다. 별도로 Python을 설치할 필요 없이 <strong>uv만 설치</strong>하면 됩니다. (교육에서는 Python 3.13.5 자동 사용)</p>
+                    </div>
+
+                    <div class="os-content windows active">
+                        <ul class="step-list">
+                            <li><strong>PowerShell에서 uv 설치</strong><br>
+                                PowerShell을 관리자 권한으로 실행한 후 다음 명령어 실행:
+                                <div class="command-box">
+                                    <code>powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"</code>
+                                </div>
+                            </li>
+                            <li><strong>설치 확인:</strong> 새 PowerShell 창을 열고 다음 명령어 실행
+                                <div class="command-box">
+                                    <code>uv --version</code>
+                                </div>
+                            </li>
+                            <li>버전 정보가 출력되면 설치 완료</li>
+                        </ul>
+                    </div>
+
+                    <div class="os-content macos">
+                        <ul class="step-list">
+                            <li><strong>터미널에서 uv 설치</strong><br>
+                                터미널을 열고 다음 명령어 실행:
+                                <div class="command-box">
+                                    <code>curl -LsSf https://astral.sh/uv/install.sh | sh</code>
+                                </div>
+                            </li>
+                            <li><strong>설치 확인:</strong> 새 터미널 창을 열고 다음 명령어 실행
+                                <div class="command-box">
+                                    <code>uv --version</code>
+                                </div>
+                            </li>
+                            <li>버전 정보가 출력되면 설치 완료</li>
+                        </ul>
+                    </div>
+
+                    <div class="info-box">
+                        <p><strong>uv란?</strong> 초고속 Python 패키지 관리 도구입니다. Python 버전 관리, 가상환경 생성, 패키지 설치를 모두 자동으로 처리합니다.</p>
+                    </div>
+                </div>
+
+                <!-- VS Code -->
+                <div class="install-item">
+                    <h3>Visual Studio Code</h3>
+
+                    <div class="os-content windows active">
+                        <ul class="step-list">
+                            <li><strong>공식 웹사이트에서 VS Code 다운로드</strong>
+                                <a href="https://code.visualstudio.com/" class="download-link" target="_blank">다운로드</a>
+                            </li>
+                            <li>User Installer 또는 System Installer 다운로드 (User Installer 권장)</li>
+                            <li>설치 프로그램을 실행하고 안내에 따라 설치를 완료합니다</li>
+                            <li><strong>설치 완료 확인:</strong> VS Code를 실행하여 정상 작동 확인</li>
+                            <li><strong>필수 확장 설치:</strong>
+                                <ol style="margin-top: 12px; margin-left: 20px;">
+                                    <li>VS Code 왼쪽 사이드바에서 Extensions 아이콘 클릭 (또는 <code style="background: #e2e8f0; padding: 2px 6px; border-radius: 0;">Ctrl+Shift+X</code>)</li>
+                                    <li>"Python" 검색 후 Microsoft 제공 확장 설치</li>
+                                    <li>"Jupyter" 검색 후 Microsoft 제공 확장 설치</li>
+                                </ol>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="os-content macos">
+                        <ul class="step-list">
+                            <li><strong>공식 웹사이트에서 VS Code 다운로드</strong>
+                                <a href="https://code.visualstudio.com/" class="download-link" target="_blank">다운로드</a>
+                            </li>
+                            <li>.dmg 파일을 다운로드하여 엽니다</li>
+                            <li>Visual Studio Code를 Applications 폴더로 드래그합니다</li>
+                            <li><strong>설치 완료 확인:</strong> Applications 폴더에서 VS Code를 실행</li>
+                            <li><strong>필수 확장 설치:</strong>
+                                <ol style="margin-top: 12px; margin-left: 20px;">
+                                    <li>VS Code 왼쪽 사이드바에서 Extensions 아이콘 클릭 (또는 <code style="background: #e2e8f0; padding: 2px 6px; border-radius: 0;">Cmd+Shift+X</code>)</li>
+                                    <li>"Python" 검색 후 Microsoft 제공 확장 설치</li>
+                                    <li>"Jupyter" 검색 후 Microsoft 제공 확장 설치</li>
+                                </ol>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="info-box">
+                        <p><strong>💡 필수 확장:</strong> Python과 Jupyter 확장은 Jupyter Notebook 사용을 위해 반드시 설치해야 합니다. (Python 패키지 jupyter, ipykernel은 uv sync 시 자동 설치됩니다)</p>
+                    </div>
+                </div>
+
+                <!-- Git -->
+                <div class="install-item">
+                    <h3>Git</h3>
+
+                    <div class="os-content windows active">
+                        <ul class="step-list">
+                            <li><strong>Git for Windows 다운로드</strong>
+                                <a href="https://git-scm.com/download/win" class="download-link" target="_blank">다운로드</a>
+                            </li>
+                            <li>설치 프로그램을 실행하고 <strong>기본 옵션으로 설치</strong> (특별한 경우가 아니면 변경하지 않기를 권장)</li>
+                            <li><strong>설치 확인:</strong> PowerShell 또는 명령 프롬프트에서 다음 명령어 실행
+                                <div class="command-box">
+                                    <code>git --version</code>
+                                </div>
+                            </li>
+                            <li><strong>Git 사용자 설정:</strong>
+                                <div class="command-box">
+                                    <code>git config --global user.name "Your Name"</code><br>
+                                    <code>git config --global user.email "your.email@example.com"</code>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="os-content macos">
+                        <ul class="step-list">
+                            <li><strong>방법 1: Homebrew로 설치 (권장)</strong>
+                                <div class="command-box">
+                                    <code>brew install git</code>
+                                </div>
+                            </li>
+                            <li><strong>방법 2: 공식 설치 파일 다운로드</strong>
+                                <a href="https://git-scm.com/download/mac" class="download-link" target="_blank">다운로드</a>
+                            </li>
+                            <li><strong>설치 확인:</strong> 터미널에서 다음 명령어 실행
+                                <div class="command-box">
+                                    <code>git --version</code>
+                                </div>
+                            </li>
+                            <li><strong>Git 사용자 설정:</strong>
+                                <div class="command-box">
+                                    <code>git config --global user.name "Your Name"</code><br>
+                                    <code>git config --global user.email "your.email@example.com"</code>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="info-box">
+                        <p><strong>참고:</strong> Git 사용자 설정은 본인의 실제 이름과 이메일로 변경해주세요.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>교육 준비사항 (API Key 발급)</h2>
+
+                <!-- Tavily API Key -->
+                <div class="install-item">
+                    <h3>Tavily API Key 개별 발급</h3>
+
+                    <div class="python-version-note" style="margin-bottom: 28px;">
+                        <p><strong>📌 웹 검색 기능 사용을 위한 필수 준비</strong><br>
+                        Day 2, 3, 4 실습에서 AI 에이전트가 웹 검색을 수행할 때 Tavily API를 사용합니다. <strong>교육 시작 전 반드시 API Key를 발급</strong>받으세요.</p>
+                    </div>
+
+                    <div class="os-content windows active">
+                        <ul class="step-list">
+                            <li><strong>Tavily 웹사이트 접속</strong>
+                                <a href="https://app.tavily.com/home" class="download-link" target="_blank">Tavily 접속</a>
+                            </li>
+                            <li>Google 계정 또는 이메일로 회원가입/로그인</li>
+                            <li>좌측 메뉴에서 <strong>API Keys</strong> 클릭</li>
+                            <li>기본 생성된 API Key를 확인하거나, <strong>+ 버튼</strong>을 눌러 새로운 키 생성</li>
+                            <li>API Key를 복사하여 안전한 곳에 보관 (교육 시 사용)</li>
+                        </ul>
+                    </div>
+
+                    <div class="os-content macos">
+                        <ul class="step-list">
+                            <li><strong>Tavily 웹사이트 접속</strong>
+                                <a href="https://app.tavily.com/home" class="download-link" target="_blank">Tavily 접속</a>
+                            </li>
+                            <li>Google 계정 또는 이메일로 회원가입/로그인</li>
+                            <li>좌측 메뉴에서 <strong>API Keys</strong> 클릭</li>
+                            <li>기본 생성된 API Key를 확인하거나, <strong>+ 버튼</strong>을 눌러 새로운 키 생성</li>
+                            <li>API Key를 복사하여 안전한 곳에 보관 (교육 시 사용)</li>
+                        </ul>
+                    </div>
+
+                    <div class="info-box">
+                        <p><strong>💡 무료 플랜:</strong> Tavily는 월 1,000회 무료 검색 크레딧을 제공합니다. 교육 기간 동안 충분히 사용할 수 있습니다.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="checklist">
+                    <h3>설치 완료 체크리스트</h3>
+                    <ul>
+                        <li>uv 설치 완료 (uv --version 확인)</li>
+                        <li>Visual Studio Code 설치 및 실행 확인</li>
+                        <li>Python, Jupyter 확장 설치 완료</li>
+                        <li>Git 설치 완료 (git --version 확인)</li>
+                        <li>Git 사용자 이름 및 이메일 설정 완료</li>
+                        <li>Tavily API Key 발급 완료</li>
+                        <li>각 프로그램이 터미널/명령 프롬프트에서 정상 실행됨</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>문제 해결</h2>
+
+                <div class="install-item">
+                    <h3>자주 발생하는 문제</h3>
+
+                    <div class="os-content windows active">
+                        <p style="margin-bottom: 10px; font-weight: 600; color: #1a202c;">"uv" 명령어를 인식할 수 없습니다</p>
+                        <ul style="margin-left: 20px; margin-bottom: 28px; color: #4a5568;">
+                            <li>uv 설치 후 PowerShell을 재시작하지 않은 경우</li>
+                            <li><strong>해결:</strong> PowerShell을 완전히 종료하고 새로 실행합니다</li>
+                            <li>또는 시스템을 재시작합니다</li>
+                        </ul>
+
+                        <p style="margin-bottom: 10px; font-weight: 600; color: #1a202c;">"git" 명령어를 인식할 수 없습니다</p>
+                        <ul style="margin-left: 20px; margin-bottom: 28px; color: #4a5568;">
+                            <li>Git 설치 후 터미널을 재시작하지 않은 경우</li>
+                            <li><strong>해결:</strong> PowerShell 또는 명령 프롬프트를 종료하고 다시 실행합니다</li>
+                        </ul>
+
+                        <p style="margin-bottom: 10px; font-weight: 600; color: #1a202c;">uv sync 실행 시 오류 발생</p>
+                        <ul style="margin-left: 20px; color: #4a5568;">
+                            <li>인터넷 연결 문제이거나 방화벽이 Python 다운로드를 차단하는 경우</li>
+                            <li><strong>해결:</strong> 인터넷 연결 확인 후 다시 시도합니다</li>
+                        </ul>
+                    </div>
+
+                    <div class="os-content macos">
+                        <p style="margin-bottom: 10px; font-weight: 600; color: #1a202c;">"uv" 명령어를 인식할 수 없습니다</p>
+                        <ul style="margin-left: 20px; margin-bottom: 28px; color: #4a5568;">
+                            <li>uv 설치 후 터미널을 재시작하지 않은 경우</li>
+                            <li><strong>해결:</strong> 터미널을 완전히 종료하고 새로 실행합니다</li>
+                            <li>또는 <code style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px;">source ~/.zshrc</code> 또는 <code style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px;">source ~/.bashrc</code> 실행</li>
+                        </ul>
+
+                        <p style="margin-bottom: 10px; font-weight: 600; color: #1a202c;">"git" 명령어를 인식할 수 없습니다</p>
+                        <ul style="margin-left: 20px; margin-bottom: 28px; color: #4a5568;">
+                            <li>Xcode Command Line Tools가 설치되지 않은 경우</li>
+                            <li><strong>해결:</strong> 터미널에서 <code style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px;">xcode-select --install</code> 실행</li>
+                        </ul>
+
+                        <p style="margin-bottom: 10px; font-weight: 600; color: #1a202c;">uv sync 실행 시 오류 발생</p>
+                        <ul style="margin-left: 20px; color: #4a5568;">
+                            <li>인터넷 연결 문제이거나 방화벽이 Python 다운로드를 차단하는 경우</li>
+                            <li><strong>해결:</strong> 인터넷 연결 확인 후 다시 시도합니다</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="info-box">
+                    <p>
+                        <strong>추가 문의사항</strong><br>
+                        설치 중 문제가 발생하거나 궁금한 점이 있으시면 교육 담당자에게 문의해주세요.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>SK RAG AI Agent 4일 과정 | 사전 설치 가이드</p>
+            <p style="margin-top: 8px;">원활한 교육을 위해 협조해 주셔서 감사합니다.</p>
+        </footer>
+    </div>
+
+    <script>
+        function switchOS(os) {
+            // 모든 OS 탭과 컨텐츠 가져오기
+            const tabs = document.querySelectorAll('.os-tab');
+            const contents = document.querySelectorAll('.os-content');
+
+            // 모든 탭에서 active 클래스 제거
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            // 모든 컨텐츠 숨기기
+            contents.forEach(content => content.classList.remove('active'));
+
+            // 선택된 OS의 탭에 active 클래스 추가
+            event.target.classList.add('active');
+
+            // 선택된 OS의 모든 컨텐츠 표시
+            const selectedContents = document.querySelectorAll(`.os-content.${os}`);
+            selectedContents.forEach(content => content.classList.add('active'));
+        }
+    </script>
+</body>
+</html>
