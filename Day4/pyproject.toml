@@ -2,13 +2,13 @@
 name = "llm-day4"
 version = "1.0.0"
 description = "SK-RAG-AI Agent 교육 - Day 4"
-requires-python = ">=3.13,<3.14"
+requires-python = ">=3.11,<3.14"
 dependencies = [
     "deepagents>=0.5.0",
-    "langchain>=0.3.0",
-    "langgraph>=0.2.0",
-    "langchain-openai>=0.2.0",
-    "langchain-community>=0.3.0",
+    "langchain>=1.2.0",
+    "langchain-openai>=1.1.0",
+    "langchain-core>=1.2.0",
+    "langchain-community>=0.4.0",
     "langchain-core>=0.3.0",
     "langgraph-cli[inmem]>=0.4.0",
     "tavily-python>=0.3.0",

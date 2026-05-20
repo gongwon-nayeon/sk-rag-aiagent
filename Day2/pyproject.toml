@@ -2,12 +2,12 @@
 name = "llm-day2"
 version = "1.0.0"
 description = "SK-RAG-AI Agent 교육 - Day 2"
-requires-python = ">=3.13,<3.14"
+requires-python = ">=3.11,<3.14"
 dependencies = [
-    "langchain>=1.0.0",
-    "langchain-openai>=1.0.0",
-    "langchain-core>=1.0.0",
-    "langchain-community",
+    "langchain>=1.2.0",
+    "langchain-openai>=1.1.0",
+    "langchain-core>=1.2.0",
+    "langchain-community>=0.4.0",
     "langgraph>=1.0.0",
     "langgraph-cli[inmem]>=0.4.0",
     "python-dotenv>=1.0.0",
