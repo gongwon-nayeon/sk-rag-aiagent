@@ -11,7 +11,7 @@ from middleware import create_middleware_stack
 middleware_stack = create_middleware_stack()
 
 graph = create_agent(
-    model="openai:gpt-4o-mini",
+    model="openai:gpt-5.4-mini",
     tools=ALL_TOOLS,
     middleware=middleware_stack,
     system_prompt="""당신은 코딩을 전문으로 하는 AI 어시스턴트입니다.

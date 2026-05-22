@@ -17,8 +17,8 @@ from langgraph.runtime import Runtime
 # ============================================
 
 # 모델 인스턴스를 모듈 레벨에서 한 번만 생성 (매 호출마다 생성 방지)
-_PLANNING_MODEL = ChatOpenAI(model="gpt-4o", temperature=0)
-_EXECUTION_MODEL = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+_PLANNING_MODEL = ChatOpenAI(model="gpt-5.4", temperature=0)
+_EXECUTION_MODEL = ChatOpenAI(model="gpt-5.4-mini", temperature=0)
 
 _PLANNING_KEYWORDS = [
     "write_todos",
@@ -39,8 +39,8 @@ async def model_routing_middleware(
     """
     작업 유형에 따라 적절한 모델을 선택합니다.
 
-    - Planning (todo 작성, 계획 수립) → gpt-4o
-    - Execution (도구 호출, 코드 실행) → gpt-4o-mini
+    - Planning (todo 작성, 계획 수립) → gpt-5.4
+    - Execution (도구 호출, 코드 실행) → gpt-5.4-mini
 
     Args:
         request: 모델 요청
@@ -67,10 +67,10 @@ async def model_routing_middleware(
         )
 
     if is_planning:
-        print(f"[Model Routing] Planning 감지 → gpt-4o 사용")
+        print(f"[Model Routing] Planning 감지 → gpt-5.4 사용")
         modified_request = request.override(model=_PLANNING_MODEL)
     else:
-        print(f"[Model Routing] Execution → gpt-4o-mini 사용")
+        print(f"[Model Routing] Execution → gpt-5.4-mini 사용")
         modified_request = request.override(model=_EXECUTION_MODEL)
 
     return await handler(modified_request)
@@ -231,12 +231,12 @@ def create_middleware_stack():
         TodoListMiddleware(),
 
         # 2. Model Routing (커스텀)
-        # planning은 gpt-4o, execution은 gpt-4o-mini
+        # planning은 gpt-5.4, execution은 gpt-5.4-mini
         model_routing_middleware,
 
         # 3. Summarization Middleware
         SummarizationMiddleware(
-            model="gpt-4o-mini",
+            model="gpt-5.4-mini",
             trigger=("messages", 20),
             keep=("messages", 8),
         ),
