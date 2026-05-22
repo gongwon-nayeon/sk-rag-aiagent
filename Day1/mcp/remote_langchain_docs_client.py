@@ -14,7 +14,7 @@ load_dotenv()
 os.getenv("OPENAI_API_KEY")
 
 # LLM 초기화
-model = init_chat_model(model="gpt-4o")
+model = init_chat_model(model="gpt-5.4-mini")
 
 
 # 1. State 정의

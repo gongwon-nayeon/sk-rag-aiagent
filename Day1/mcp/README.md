@@ -53,7 +53,7 @@ python remote_langchain_docs_client.py
 
 ### 실습 예시
 
-> - LangGraph의 특징에 대해 알려주세요.
+> - 랭체인에서 도구(툴) 만드는법 알려줘
 > - 랭체인의 create_agent 사용법(파이썬) 알려주세요.
 > - 랭체인을 처음 사용하는 사람이 읽으면 좋은 문서는?
 > - langchain-openai 사용법 알려주세요.

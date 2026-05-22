@@ -55,7 +55,7 @@ async def main():
             print()
 
             # LLM 설정 (Tool 사용 설정)
-            llm = init_chat_model(model="gpt-4o", temperature=0)
+            llm = init_chat_model(model="gpt-5.4-mini", temperature=0)
             llm_with_tools = llm.bind_tools(tools)
 
             # LLM 노드 정의
