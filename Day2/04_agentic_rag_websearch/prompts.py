@@ -66,7 +66,7 @@ HALLUCINATION_GRADER_PROMPT = ChatPromptTemplate.from_template(
 # 답변 유용성 평가 프롬프트
 ANSWER_GRADER_PROMPT = ChatPromptTemplate.from_template(
     """
-    당신은 답변이 질문을 해결하는지 평가하는 평가자입니다.
+    당신은 답변이 질문에 대해 유용한 정보를 제공하는지 평가하는 평가자입니다.
 
     <question>
     {question}
@@ -76,8 +76,15 @@ ANSWER_GRADER_PROMPT = ChatPromptTemplate.from_template(
     {generation}
     </generation>
 
-    답변이 질문을 해결하면 'yes', 그렇지 않으면 'no'를 반환하세요.
-    모호한 경우에는 'no'를 반환하세요.
+    다음 기준으로 평가하세요:
+    - 답변이 질문의 핵심 의도에 대응하는가?
+    - 질문에서 요청한 정보를 실질적으로 제공하는가?
+    - 답변 내용이 질문과 관련성이 있는가?
+
+    답변이 질문에 대해 의미 있는 정보를 제공한다면 'yes'를 반환하세요.
+    답변이 질문과 완전히 무관하거나 요청한 정보를 전혀 제공하지 않을 때만 'no'를 반환하세요.
+
+    관대하게 평가하세요. 답변이 부분적으로라도 질문에 답하고 있다면 'yes'입니다.
     """
 )
 

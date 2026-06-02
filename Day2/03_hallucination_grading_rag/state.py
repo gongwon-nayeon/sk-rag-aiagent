@@ -8,7 +8,7 @@ load_dotenv()
 
 
 def _get_llm():
-    return init_chat_model("gpt-4o-mini")
+    return init_chat_model("gpt-5.4-mini")
 
 
 class InputState(TypedDict):

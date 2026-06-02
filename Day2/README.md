@@ -152,4 +152,8 @@ uv run langgraph dev
 # 03번 실습 - 환각 평가 RAG
 cd 03_hallucination_grading_rag
 uv run langgraph dev
+
+# 04번 실습 - 웹 검색 추가 RAG
+cd 04_agentic_rag_websearch
+uv run langgraph dev
 ```

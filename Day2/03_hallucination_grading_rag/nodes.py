@@ -106,6 +106,7 @@ def generate(state: State):
     주어진 문서 텍스트를 기반으로 사용자의 질문에 대해 충실히 답변하세요.
     답변은 마크다운 문법 형식으로 적절한 볼드체, 제목, 불렛 등을 사용하여 가독성 좋게 작성하세요.
     문서의 출처(문서의 원본 출처와 페이지 출처)도 함께 명시하세요.
+    확장 가능한 질문은 추천하지 마세요.
     """
 
     system_msg = SystemMessage(SYSTEM_PROMPT)
@@ -221,6 +222,8 @@ def grade_generation_v_documents_and_question(state: State) -> Literal["useful",
         answer_grader = llm.with_structured_output(GradeAnswer)
         answer_chain = ANSWER_GRADER_PROMPT | answer_grader
 
+        print(question)
+        print(generation)
         score = answer_chain.invoke({
             "question": question,
             "generation": generation

@@ -75,6 +75,7 @@ def generate(state: State):
     당신은 관련 문서를 기반으로 답변하는 어시스턴트입니다.
     주어진 문서 텍스트를 기반으로 사용자의 질문에 대해 충실히 답변하세요.
     답변은 마크다운 문법 형식으로 적절한 볼드체, 제목, 불렛 등을 사용하여 가독성 좋게 작성하세요.
+    확장 가능한 질문은 추천하지 마세요.
     """
     system_msg = SystemMessage(SYSTEM_PROMPT)
     human_msg = HumanMessage(f"""

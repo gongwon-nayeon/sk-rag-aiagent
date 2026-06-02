@@ -8,7 +8,7 @@ load_dotenv()
 
 
 def _get_llm():
-    return init_chat_model("gpt-4o")
+    return init_chat_model("gpt-5.4-mini")
 
 
 class InputState(TypedDict):
@@ -21,4 +21,4 @@ class State(MessagesState):
     query: Optional[str]
     answer: Optional[str]
     context: Optional[str]
-    retry_count: Optional[int] = 0
+    retry_count: Optional[int]
