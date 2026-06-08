@@ -4,6 +4,8 @@ Python version: 3.13.5
 
 강의 자료(PDF): https://drive.google.com/file/d/1owaffY5qwef29jKDT1053V7Pv3WEazN6/view?usp=sharing
 
+https://drive.google.com/file/d/1j2hXKKoUIwarxtI0VFUPgKTFHI6DCwT1/view
+
 ```
 📦sk-rag-aiagent
  ┣ 📂Day1
