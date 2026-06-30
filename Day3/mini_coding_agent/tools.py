@@ -1,8 +1,5 @@
 import os
-import subprocess
-import json
 import glob as glob_module
-from typing import Any
 from langchain.tools import tool
 
 
@@ -231,111 +228,6 @@ def glob(pattern: str, directory: str = ".") -> str:
 
 
 # ============================================
-# 3. 테스트 실행 도구 (pytest)
-# ============================================
-
-@tool
-def run_pytest(test_path: str = ".", args: str = "-v") -> str:
-    """
-    pytest를 실행하고 결과를 반환합니다.
-
-    Args:
-        test_path: 테스트 파일 또는 디렉토리 경로
-        args: pytest 추가 인자 (기본값: -v)
-
-    Returns:
-        테스트 실행 결과
-
-    Examples:
-        run_pytest("tests/")
-        run_pytest("test_math.py", "-v -s")
-    """
-    try:
-        cmd = ["pytest", test_path] + args.split()
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            timeout=30
-        )
-
-        output = result.stdout + result.stderr
-
-        if result.returncode == 0:
-            return f"✅ 테스트 통과:\n{output}"
-        else:
-            return f"❌ 테스트 실패:\n{output}"
-
-    except subprocess.TimeoutExpired:
-        return "❌ 테스트 실행 시간 초과 (30초)"
-    except FileNotFoundError:
-        return "❌ pytest가 설치되어 있지 않습니다. 'pip install pytest'로 설치하세요."
-    except Exception as e:
-        return f"❌ 테스트 실행 오류: {str(e)}"
-
-
-@tool
-def parse_pytest_results(pytest_output: str) -> str:
-    """
-    pytest 출력을 파싱하여 요약 정보를 반환합니다.
-
-    Args:
-        pytest_output: pytest 실행 결과 문자열
-
-    Returns:
-        파싱된 결과 요약
-    """
-    try:
-        lines = pytest_output.split('\n')
-
-        summary = {
-            "passed": 0,
-            "failed": 0,
-            "errors": 0,
-            "skipped": 0,
-            "failed_tests": []
-        }
-
-        for line in lines:
-            if " passed" in line:
-                parts = line.split()
-                for i, part in enumerate(parts):
-                    if part == "passed" and i > 0:
-                        try:
-                            summary["passed"] = int(parts[i-1])
-                        except:
-                            pass
-
-            if " failed" in line:
-                parts = line.split()
-                for i, part in enumerate(parts):
-                    if part == "failed" and i > 0:
-                        try:
-                            summary["failed"] = int(parts[i-1])
-                        except:
-                            pass
-
-            if "FAILED" in line:
-                summary["failed_tests"].append(line.strip())
-
-        result = f"""
-📊 테스트 결과 요약:
-- 통과: {summary['passed']}
-- 실패: {summary['failed']}
-- 오류: {summary['errors']}
-- 건너뜀: {summary['skipped']}
-"""
-
-        if summary["failed_tests"]:
-            result += f"\n실패한 테스트:\n" + "\n".join(summary["failed_tests"])
-
-        return result
-
-    except Exception as e:
-        return f"❌ 결과 파싱 오류: {str(e)}"
-
-
-# ============================================
 # 도구 목록
 # ============================================
 
@@ -348,9 +240,5 @@ ALL_TOOLS = [
     write_file,
     edit_file,
     grep_search,
-    glob,
-
-    # 테스트
-    run_pytest,
-    parse_pytest_results,
+    glob
 ]
