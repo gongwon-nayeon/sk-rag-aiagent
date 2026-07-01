@@ -26,6 +26,14 @@ PDF 문서를 PyMuPDF로 로딩하고 ChromaDB 벡터스토어를 구축하여 �
 ### LangGraph Studio 실행
 
 ```bash
+cd Day2
+
+# 가상환경 활성화 (Windows)
+.venv\Scripts\activate
+
+# 가상환경 활성화 (macOS/Linux)
+source .venv/bin/activate
+
 # 01_basic_rag_chromadb 폴더로 이동
 cd 01_basic_rag_chromadb
 

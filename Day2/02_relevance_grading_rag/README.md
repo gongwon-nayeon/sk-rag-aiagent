@@ -28,6 +28,14 @@
 ### LangGraph Studio 실행
 
 ```bash
+cd Day2
+
+# 가상환경 활성화 (Windows)
+.venv\Scripts\activate
+
+# 가상환경 활성화 (macOS/Linux)
+source .venv/bin/activate
+
 # 02_relevance_grading_rag 폴더로 이동
 cd 02_relevance_grading_rag
 

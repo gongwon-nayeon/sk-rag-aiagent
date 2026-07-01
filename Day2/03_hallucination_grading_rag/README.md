@@ -26,6 +26,14 @@
 
 
 ```bash
+cd Day2
+
+# 가상환경 활성화 (Windows)
+.venv\Scripts\activate
+
+# 가상환경 활성화 (macOS/Linux)
+source .venv/bin/activate
+
 # 03_hallucination_grading_rag 폴더로 이동
 cd 03_hallucination_grading_rag
 
