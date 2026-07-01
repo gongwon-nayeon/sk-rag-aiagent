@@ -9,7 +9,7 @@ from langchain_core.tools import create_retriever_tool
 
 
 def setup_retriever():
-    file_path = "../dataset/SPRi AI Brief 6월호.pdf"
+    file_path = "../dataset/SPRi AI Brief 7월호_최종.pdf"
 
     # PyMuPDF로 문서 로드
     doc = fitz.open(file_path)
@@ -39,7 +39,7 @@ def setup_retriever():
     # 벡터스토어 생성 (persist 없이 메모리에만)
     embeddings = OpenAIEmbeddings()
     vectorstore = Chroma(
-        collection_name="june_doc",
+        collection_name="ai_doc",
         embedding_function=embeddings
     )
 

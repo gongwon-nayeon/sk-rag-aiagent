@@ -16,7 +16,6 @@ https://drive.google.com/file/d/1j2hXKKoUIwarxtI0VFUPgKTFHI6DCwT1/view
  ┃ ┣ 📜05_langgraph_tools_chatbot.ipynb
  ┃ ┣ 📂mcp
  ┃ ┣ 📜pyproject.toml
- ┃ ┣ 📜requirements.txt
  ┃ ┗ 📜README.md
  ┣ 📂Day2
  ┃ ┣ 📜01_basic_rag_chromadb.ipynb
@@ -26,7 +25,6 @@ https://drive.google.com/file/d/1j2hXKKoUIwarxtI0VFUPgKTFHI6DCwT1/view
  ┃ ┣ 📂04_agentic_rag_websearch
  ┃ ┣ 📂dataset
  ┃ ┣ 📜pyproject.toml
- ┃ ┣ 📜requirements.txt
  ┃ ┗ 📜README.md
  ┣ 📂Day3
  ┃ ┣ 📜01_langchain_create_agent.ipynb
@@ -36,7 +34,6 @@ https://drive.google.com/file/d/1j2hXKKoUIwarxtI0VFUPgKTFHI6DCwT1/view
  ┃ ┣ 📂mini_coding_agent
  ┃ ┣ 📂workspace
  ┃ ┣ 📜pyproject.toml
- ┃ ┣ 📜requirements.txt
  ┃ ┗ 📜README.md
  ┣ 📂Day4
  ┃ ┣ 📜01_file_system.ipynb
@@ -44,7 +41,6 @@ https://drive.google.com/file/d/1j2hXKKoUIwarxtI0VFUPgKTFHI6DCwT1/view
  ┃ ┣ 📂03_deep_agent_skills
  ┃ ┣ 📂deep_research
  ┃ ┣ 📜pyproject.toml
- ┃ ┣ 📜requirements.txt
  ┃ ┗ 📜README.md
  ┗ 📜README.md
 ```
