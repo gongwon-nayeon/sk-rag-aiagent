@@ -9,6 +9,7 @@ load_dotenv(env_path)
 
 from tavily import TavilyClient
 from deepagents import create_deep_agent
+from deepagents.backends import FilesystemBackend, CompositeBackend, StateBackend
 
 # Tavily 클라이언트 초기화
 tavily_client = TavilyClient(api_key=os.environ["TAVILY_API_KEY"])
@@ -47,9 +48,11 @@ RESEARCH_INSTRUCTIONS = """당신은 전문 연구자입니다. 당신의 임무
 - 자료의 출처를 명확히 기록하세요.
 """
 
-# Deep Agent 생성
+base_dir = Path(__file__).parent
+
 agent = create_deep_agent(
     model="openai:gpt-5.4-mini",
     tools=[internet_search],
     system_prompt=RESEARCH_INSTRUCTIONS,
+    backend=FilesystemBackend(root_dir=str(base_dir), virtual_mode=True)
 )
