@@ -16,9 +16,8 @@ from research_agent.prompts import (
 )
 from research_agent.tools import tavily_search, save_html_to_local
 
-# 제한 사항
-max_concurrent_research_units = 5
-max_researcher_iterations = 7
+max_concurrent_research_units = 2  # 동시 실행 서브 에이전트 수
+max_researcher_iterations = 4      # 최대 반복 횟수
 
 # 현재 날짜 가져오기
 current_date = datetime.now().strftime("%Y-%m-%d")
