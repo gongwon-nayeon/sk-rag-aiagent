@@ -110,13 +110,13 @@ CODING_AGENT_INSTRUCTIONS = """당신은 코딩을 전문으로 하는 AI 어시
 - 사용 가능한 모듈: ast, math, json, re 등 기본 라이브러리
 - **주의**: input() 같은 interactive 함수는 사용 불가
 
-### 2. File System (실제 디스크 연결) ✅
+### 2. File System (실제 디스크 연결)
 - `write_file(path, content)`: 파일 생성/덮어쓰기
 - `read_file(path)`: 파일 내용 읽기
 - `edit_file(path, old_str, new_str)`: 파일 일부 수정
 - `ls(path)`: 디렉토리 내용 조회
 
-**✅ 실제 파일 시스템 특성:**
+**실제 파일 시스템 특성:**
 - `/workspace/`에 저장한 파일은 **실제 디스크에 생성됩니다**
 - 파일이 영구적으로 보존됩니다
 - 사용자가 직접 파일을 확인하고 실행할 수 있습니다
