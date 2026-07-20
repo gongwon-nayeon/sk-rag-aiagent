@@ -1,6 +1,6 @@
 from langchain_mcp_adapters.client import MultiServerMCPClient  # type: ignore
 from langchain.chat_models import init_chat_model
-from langchain.messages import SystemMessage, HumanMessage
+from langchain.messages import SystemMessage, HumanMessage, ToolMessage
 
 from typing_extensions import TypedDict, Annotated
 from langgraph.graph.message import add_messages
@@ -98,7 +98,7 @@ async def run():
         "langchain-docs": {
             "url": "https://docs.langchain.com/mcp",
             "transport": "http",
-        }
+        },
     }
 
     print("=" * 60)
@@ -137,10 +137,32 @@ async def run():
         print("\n" + "=" * 60)
         print("실행 결과:")
         print("=" * 60)
-        for msg in result["messages"]:
-            msg.pretty_print()
 
-        print("=" * 60)
+        def print_message_with_limit(msg, max_length=500):
+            """메시지를 길이 제한과 함께 출력합니다."""
+            if hasattr(msg, 'type') and msg.type == "tool":
+                # ToolMessage인 경우 내용 제한
+                print(f"\n[Tool Result: {msg.name if hasattr(msg, 'name') else 'Unknown'}]")
+                content = str(msg.content)
+                if len(content) > max_length:
+                    print(content[:max_length] + f"...\n(생략됨: {len(content) - max_length}자)")
+                else:
+                    print(content)
+            elif hasattr(msg, 'tool_calls') and msg.tool_calls:
+                # AIMessage with tool_calls
+                print(f"\n[AI] Tool 호출 요청:")
+                for tc in msg.tool_calls:
+                    args_str = str(tc.get('args', {}))
+                    if len(args_str) > 200:
+                        args_str = args_str[:200] + "..."
+                    print(f"  📌 {tc.get('name')}: {args_str}")
+            else:
+                msg.pretty_print()
+
+        for msg in result["messages"]:
+            print_message_with_limit(msg, max_length=500)
+
+        print("\n" + "=" * 60)
 
     except Exception as e:
         print(f"\n오류 발생: {e}")
