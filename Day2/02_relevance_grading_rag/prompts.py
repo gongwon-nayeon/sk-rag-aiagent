@@ -17,6 +17,7 @@ RELEVANCE_GRADER_PROMPT = ChatPromptTemplate.from_template(
     사용자의 질문이 너무 짧거나, 모호하거나, 명확한 의도를 판단하기에 충분한 맥락이 부족한 경우,
     관련성이 없다고 평가하고 "no"를 반환하세요.
     관련성이 있는 경우 "yes"를 반환하세요.
+    context가 비워져 있으면 무조건 "no" 입니다.
     """
 )
 
