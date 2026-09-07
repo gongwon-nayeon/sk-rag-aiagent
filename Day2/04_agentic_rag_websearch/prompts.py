@@ -89,16 +89,20 @@ ANSWER_GRADER_PROMPT = ChatPromptTemplate.from_template(
 )
 
 
-# 쿼리 재작성 프롬프트
+# 쿼리 재작성 프롬프트 (검색 대상에 따라 재작성 지침이 달라짐)
 QUERY_REWRITER_PROMPT = ChatPromptTemplate.from_template(
     """
-    당신은 입력된 질문을 벡터스토어 검색에 최적화된 더 나은 버전으로 변환하는 질문 재작성자입니다.
+    당신은 입력된 질문을 더 나은 검색 쿼리로 변환하는 질문 재작성자입니다.
     입력을 보고 근본적인 의미적 의도를 추론하세요.
 
     <question>
     {question}
     </question>
 
-    위 질문을 개선하여 한국어로 재작성하세요.
+    <guidance>
+    {rewrite_guidance}
+    </guidance>
+
+    위 지침에 따라 질문을 개선하여 한국어로 재작성하세요.
     """
 )

@@ -114,7 +114,7 @@ def retrieve(state: State):
         context += f"Document {idx + 1}:\n{doc.page_content}\n{doc.metadata}\n"
         print(f"Retrieved Document {idx + 1}: {doc.page_content[:100]}...")
 
-    return {"document": context, "question": question}
+    return {"document": context, "question": question, "source": "rag"}
 
 
 def web_search(state: State):
@@ -150,7 +150,8 @@ def web_search(state: State):
 
     return {
         "document": context,
-        "question": question
+        "question": question,
+        "source": "web"
     }
 
 
@@ -252,17 +253,33 @@ def generate(state: State):
 def transform_query(state: State):
     """
     검색 성능 향상을 위해 질문을 재작성합니다.
+    재시도할 검색 대상(RAG/웹)에 맞춰 재작성 지침을 다르게 적용합니다.
     """
     print("##### TRANSFORM QUERY #####")
 
     question = state["question"]
+    source = state.get("source", "rag")
+
+    if source == "web":
+        rewrite_guidance = (
+            "이 질문은 웹 검색 엔진에 사용됩니다. "
+            "검색엔진이 결과를 잘 찾을 수 있도록 핵심 키워드 중심의 간결한 검색어로 재작성하세요."
+        )
+    else:
+        rewrite_guidance = (
+            "이 질문은 벡터스토어 문서 검색에 사용됩니다. "
+            "문서에 사용됐을 법한 용어와 의미를 포함해 검색에 최적화된 문장으로 재작성하세요."
+        )
 
     # 쿼리 재작성
     llm = _get_llm()
     question_rewriter = QUERY_REWRITER_PROMPT | llm
-    better_question = question_rewriter.invoke({"question": question})
+    better_question = question_rewriter.invoke({
+        "question": question,
+        "rewrite_guidance": rewrite_guidance
+    })
 
-    print(f"Original Question: {question}")
+    print(f"Original Question: {question} (source: {source})")
     print(f"Better Question: {better_question.content}")
 
     return {
@@ -275,6 +292,19 @@ def transform_query(state: State):
 # ===============================
 # 엣지 조건 함수
 # ===============================
+
+def route_after_transform_query(state: State) -> Literal["retrieve", "web_search"]:
+    """
+    쿼리 재작성 후, document를 만들어낸 원래 출처(source)로 되돌아갑니다.
+    web_search에서 온 경우 web_search로, retrieve에서 온 경우 retrieve로 재시도합니다.
+    """
+    if state.get("source") == "web":
+        print("---ROUTE DECISION: RETRY WEB SEARCH---")
+        return "web_search"
+    else:
+        print("---ROUTE DECISION: RETRY RAG RETRIEVE---")
+        return "retrieve"
+
 
 def route_question(state: State) -> Literal["simple_response", "retrieve", "web_search"]:
     """
@@ -298,19 +328,24 @@ def route_question(state: State) -> Literal["simple_response", "retrieve", "web_
         return "web_search"
 
 
-def decide_to_generate(state: State) -> Literal["transform_query", "generate"]:
+def decide_to_generate(state: State) -> Literal["transform_query", "generate", "web_search"]:
     """
-    문서 관련성에 따라 답변 생성 또는 쿼리 재작성을 결정합니다.
-    관련성 있음 -> generate, 관련성 없음 -> transform_query
+    문서 관련성에 따라 답변 생성/쿼리 재작성/웹 검색 보강을 결정합니다.
+    - 관련성 있음 -> generate
+    - 관련성 없고 재시도 여유 있음 -> transform_query (쿼리 재작성 후 재검색)
+    - 관련성 없고 재시도 소진 -> web_search (RAG 문서로 부족하므로 웹 검색으로 context 보강, Corrective RAG)
     """
     print("##### ASSESS GRADED DOCUMENTS #####")
 
-    if state["document"] == "" and state.get("retry_num", 0) < 2:
+    if state["document"] != "":
+        print("---DECISION: GENERATE---")
+        return "generate"
+    elif state.get("retry_num", 0) < 2:
         print("---DECISION: TRANSFORM QUERY---")
         return "transform_query"
     else:
-        print("---DECISION: GENERATE---")
-        return "generate"
+        print("---DECISION: RAG DOCUMENT NOT FOUND, FALLBACK TO WEB SEARCH---")
+        return "web_search"
 
 
 def grade_generation_v_documents_and_question(state: State) -> Literal["useful", "not useful", "not supported"]:

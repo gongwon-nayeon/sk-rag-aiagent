@@ -11,6 +11,7 @@ from nodes import (
     transform_query,
     route_question,
     decide_to_generate,
+    route_after_transform_query,
     grade_generation_v_documents_and_question,
 )
 
@@ -23,13 +24,14 @@ def create_agent_graph():
     1. query_analysis: LLM이 질문 의도 분류 (simple/rag/web)
     2. route_question: 분류 결과에 따라 라우팅
        - simple → simple_response → END
-       - rag → retrieve → grade_documents → generate/transform_query
+       - rag → retrieve → grade_documents → generate/transform_query/web_search
        - web → web_search → generate
-    3. transform_query: 쿼리 재작성 후 retrieve로 루프백
+    3. transform_query: 쿼리 재작성 후 원래 문서를 만들어낸 노드(retrieve 또는 web_search)로 루프백 (최대 2회)
+       RAG 재작성 후에도 관련 문서를 못 찾으면 web_search로 context 보강 (Corrective RAG)
     4. generate → grade_generation_v_documents_and_question: 환각/유용성 평가
        - not supported → generate (재생성)
        - useful → END (종료)
-       - not useful → transform_query (쿼리 재작성)
+       - not useful → transform_query (쿼리 재작성 후 source에 따라 retrieve/web_search로 재시도)
     """
     graph_builder = StateGraph(State, input_schema=InputState, output_schema=OutputState)
 
@@ -68,13 +70,21 @@ def create_agent_graph():
         "grade_documents",
         decide_to_generate,
         {
-            "transform_query": "transform_query",  # 관련성 낮음 → 쿼리 재작성
+            "transform_query": "transform_query",  # 관련성 낮음, 재시도 여유 있음 → 쿼리 재작성
+            "web_search": "web_search",             # 관련성 낮음, 재시도 소진 → 웹 검색으로 context 보강
             "generate": "generate",                # 관련성 높음 → 답변 생성
         },
     )
 
-    # transform_query → retrieve (쿼리 재작성 후 다시 검색)
-    graph_builder.add_edge("transform_query", "retrieve")
+    # transform_query → source에 따라 retrieve 또는 web_search로 재시도
+    graph_builder.add_conditional_edges(
+        "transform_query",
+        route_after_transform_query,
+        {
+            "retrieve": "retrieve",       # RAG 문서에서 온 경우 → 다시 RAG 검색
+            "web_search": "web_search",   # 웹 검색에서 온 경우 → 다시 웹 검색
+        },
+    )
 
     # web_search → generate (웹 검색 결과로 바로 답변 생성)
     graph_builder.add_edge("web_search", "generate")
