@@ -1,79 +1,75 @@
-from typing import Any, Callable
+from typing import Any
+import os
+from langchain_core.messages import SystemMessage
 from langchain.agents.middleware import (
     TodoListMiddleware,
     SummarizationMiddleware,
-    ModelRequest,
-    ModelResponse,
-    wrap_model_call,
     after_model,
     AgentState,
+    before_agent,
 )
-from langchain_openai import ChatOpenAI
 from langgraph.runtime import Runtime
 
-
 # ============================================
-# 1. Model Routing Middleware (커스텀)
+# 1. Workspace Index Middleware (커스텀)
 # ============================================
 
-# 모델 인스턴스를 모듈 레벨에서 한 번만 생성 (매 호출마다 생성 방지)
-_PLANNING_MODEL = ChatOpenAI(model="gpt-5.4", temperature=0)
-_EXECUTION_MODEL = ChatOpenAI(model="gpt-5.4-mini", temperature=0)
+@before_agent
+def workspace_index_middleware(state: AgentState, runtime: Runtime) -> dict[str, Any] | None:
+    """Workspace Index Middleware
 
-_PLANNING_KEYWORDS = [
-    "write_todos",
-    "계획",
-    "단계",
-    "전략",
-    "분석",
-    "설계",
-    "구조",
-]
+    에이전트 시작 시 현재 작업 디렉터리의 모든 파일과 폴더를 스캔하여
+    목록을 state에 저장합니다.
 
-
-@wrap_model_call
-async def model_routing_middleware(
-    request: ModelRequest,
-    handler: Callable[[ModelRequest], ModelResponse],
-) -> ModelResponse:
+    이를 통해 LLM은 매번 list_directory를 호출하지 않고도
+    workspace의 파일 구조를 즉시 파악할 수 있습니다.
     """
-    작업 유형에 따라 적절한 모델을 선택합니다.
+    print("\n[Workspace Index] 파일 인덱싱 시작...")
 
-    - Planning (todo 작성, 계획 수립) → gpt-5.4
-    - Execution (도구 호출, 코드 실행) → gpt-5.4-mini
+    cwd = os.getcwd()
+    file_list = []
 
-    Args:
-        request: 모델 요청
-        handler: 실제 모델 호출 핸들러
+    # workspace 스캔 (최대 3단계 깊이, 모든 파일/폴더 대상)
+    for root, dirs, files in os.walk(cwd):
+        # 제외할 디렉터리
+        dirs[:] = [d for d in dirs if not d.startswith('.')
+                   and d not in ['__pycache__', 'node_modules', 'venv', '.cache', 'backup']]
 
-    Returns:
-        모델 응답
-    """
-    # 메시지에서 planning 관련 키워드 확인
-    messages = request.messages if hasattr(request, 'messages') else []
+        level = root.replace(cwd, '').count(os.sep)
+        if level > 3:
+            continue
 
-    is_planning = False
-    if messages:
-        last_message = messages[-1]
-        content = ""
+        # 폴더 목록 추가
+        for dir_name in dirs:
+            dir_path = os.path.join(root, dir_name)
+            rel_path = os.path.relpath(dir_path, cwd)
+            file_list.append(f"  • {rel_path}/")
 
-        if isinstance(last_message, dict):
-            content = last_message.get("content", "")
-        elif hasattr(last_message, "content"):
-            content = last_message.content
+        # 파일 목록 추가 (확장자 제한 없이 전체)
+        for file in files:
+            if file.startswith('.'):
+                continue
 
-        is_planning = any(
-            keyword in str(content).lower() for keyword in _PLANNING_KEYWORDS
-        )
+            file_path = os.path.join(root, file)
+            rel_path = os.path.relpath(file_path, cwd)
+            file_list.append(f"  • {rel_path}")
 
-    if is_planning:
-        print(f"[Model Routing] Planning 감지 → gpt-5.4 사용")
-        modified_request = request.override(model=_PLANNING_MODEL)
-    else:
-        print(f"[Model Routing] Execution → gpt-5.4-mini 사용")
-        modified_request = request.override(model=_EXECUTION_MODEL)
+    # 인덱스 요약
+    index_info = [
+        f"📁 Workspace: {cwd}",
+        f"📊 총 {len(file_list)}개 파일/폴더 발견\n",
+        "📋 파일/폴더 목록:"
+    ]
+    index_info.extend(file_list)
 
-    return await handler(modified_request)
+    print(f"[Workspace Index] ✅ {len(file_list)}개 파일/폴더 인덱싱 완료")
+
+    # 시스템 메시지로 인덱스 정보 추가
+    system_message = SystemMessage(
+        content=f"[Workspace Index]\n{chr(10).join(index_info)}\n\n사용자가 요청하는 파일/폴더를 이 목록에서 찾아 처리하세요."
+    )
+
+    return {"messages": [system_message]}
 
 
 # ============================================
@@ -230,22 +226,21 @@ def create_middleware_stack():
         # 1. Planning Middleware
         TodoListMiddleware(),
 
-        # 2. Model Routing (커스텀)
-        # planning은 gpt-5.4, execution은 gpt-5.4-mini
-        model_routing_middleware,
-
-        # 3. Summarization Middleware
+        # 2. Summarization Middleware
         SummarizationMiddleware(
             model="gpt-5.4-mini",
             trigger=("messages", 20),
             keep=("messages", 8),
         ),
 
-        # 4. Lint Checker (커스텀)
+        # 1. Workspace Index Middleware (커스텀)
+        workspace_index_middleware,
+
+        # 2. Lint Checker (커스텀)
         # 코드 생성 후 자동으로 lint 오류 확인
         lint_checker_middleware,
 
-        # 5. Tool Call Logger (유틸리티)
+        # 3. Tool Call Logger (유틸리티)
         # 도구 호출 로깅
         tool_call_logger,
     ]
