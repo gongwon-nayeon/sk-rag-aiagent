@@ -1,3 +1,5 @@
+import os
+
 import fitz
 from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -10,8 +12,10 @@ from langchain_core.tools import create_retriever_tool
 
 def setup_retriever():
     file_path = "../dataset/SPRi AI Brief 7월호_최종.pdf"
+    persist_directory = "../chroma_db"
+    db_exists = os.path.isdir(persist_directory) and bool(os.listdir(persist_directory))
 
-    # PyMuPDF로 문서 로드
+    # PyMuPDF로 문서 로드 (재사용 시에도 parent page 원본 복원을 위해 필요)
     doc = fitz.open(file_path)
     docs = []
 
@@ -36,11 +40,12 @@ def setup_retriever():
     # child_splitter 정의
     child_splitter = RecursiveCharacterTextSplitter(chunk_size=400, chunk_overlap=50)
 
-    # 벡터스토어 생성 (persist 없이 메모리에만)
+    # 벡터스토어 생성 (기존 chroma_db가 있으면 그대로 로드, 없으면 새로 생성 후 저장)
     embeddings = OpenAIEmbeddings()
     vectorstore = Chroma(
         collection_name="ai_doc",
-        embedding_function=embeddings
+        embedding_function=embeddings,
+        persist_directory=persist_directory
     )
 
     # docstore 생성 (InMemoryByteStore)
@@ -55,19 +60,38 @@ def setup_retriever():
         search_kwargs={"k": 1}
     )
 
-    # 문서 추가
-    print("문서를 벡터스토어에 추가 중...")
-    parent_retriever.add_documents(docs)
+    if db_exists and vectorstore._collection.count() > 0:
+        # 기존 chroma_db 재사용: 재임베딩 없이 doc_id -> 원본 페이지만 docstore에 복원
+        print("기존 chroma_db를 재사용합니다 (재임베딩 없음)...")
+        existing = vectorstore._collection.get(include=["metadatas"])
+        page_by_doc_id = {
+            metadata["doc_id"]: metadata["page"] for metadata in existing["metadatas"]
+        }
+        page_to_doc = {d.metadata["page"]: d for d in docs}
+        full_docs = [
+            (doc_id, page_to_doc[page])
+            for doc_id, page in page_by_doc_id.items()
+            if page in page_to_doc
+        ]
+        docstore.mset(full_docs)
+    else:
+        # 문서 추가
+        print("chroma_db가 없어 새로 생성합니다. 문서를 벡터스토어에 추가 중...")
+        parent_retriever.add_documents(docs)
 
     child_count = vectorstore._collection.count()
     parent_count = len(list(docstore.yield_keys()))
     print(f"child chunk 수: {child_count}, parent page 수: {parent_count}")
 
     # Retriever Tool 생성
+    from langchain_core.prompts import PromptTemplate
     retriever_tool = create_retriever_tool(
         parent_retriever,
         "retrieve_AI_brief",
         "AI 기술 관련 정보를 SPRi AI Brief에서 검색하고 반환합니다.",
+        document_prompt=PromptTemplate.from_template(
+        "{page_content} 파일명: {source} 문서 페이지: {page}"
+    ),
     )
 
     return parent_retriever, retriever_tool
