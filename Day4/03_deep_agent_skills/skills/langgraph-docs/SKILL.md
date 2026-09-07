@@ -21,3 +21,4 @@ description: Fetches and references LangGraph Python documentation to build stat
 ### 3. Fetch and Apply
 
 2번에서 선택한 URL에 대해 반드시 `fetch_url` 도구를 사용하여 내용을 읽은 후, 해당 문서 내용을 충분히 활용하고 출처를 포함하여 사용자의 요청에 대한 답변 제공
+fetch_url 도구를 사용했을 때, large_tool_results에 저장되었다는 메시지가 나오면, 반드시 해당 파일을 read_file 도구를 활용하여 직접 순차적으로 끊어읽거나(pagination), grep을 활용하여 반드시 관련 본문을 직접 읽어 답변할 것
