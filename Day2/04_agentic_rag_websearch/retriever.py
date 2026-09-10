@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 
 import fitz
 from langchain_core.documents import Document
@@ -9,11 +9,13 @@ from langchain_classic.retrievers import ParentDocumentRetriever
 from langchain_core.stores import InMemoryByteStore
 from langchain_core.tools import create_retriever_tool
 
+BASE_DIR = Path(__file__).resolve().parent.parent
+
 
 def setup_retriever():
-    file_path = "../dataset/(PDF)SPRi AI Brief 2026년 8월호.pdf"
-    persist_directory = "../chroma_db"
-    db_exists = os.path.isdir(persist_directory) and bool(os.listdir(persist_directory))
+    file_path = BASE_DIR / "dataset" / "(PDF)SPRi AI Brief 2026년 8월호.pdf"
+    persist_directory = BASE_DIR / "chroma_db"
+    db_exists = persist_directory.is_dir() and any(persist_directory.iterdir())
 
     # PyMuPDF로 문서 로드 (재사용 시에도 parent page 원본 복원을 위해 필요)
     doc = fitz.open(file_path)
@@ -28,7 +30,7 @@ def setup_retriever():
             Document(
                 page_content=text,
                 metadata={
-                    "source": file_path,
+                    "source": str(file_path),
                     "page": page_num + 1  # 1부터 시작
                 }
             )
@@ -45,7 +47,7 @@ def setup_retriever():
     vectorstore = Chroma(
         collection_name="ai_doc",
         embedding_function=embeddings,
-        persist_directory=persist_directory
+        persist_directory=str(persist_directory)
     )
 
     # docstore 생성 (InMemoryByteStore)
@@ -57,7 +59,7 @@ def setup_retriever():
         docstore=docstore,
         child_splitter=child_splitter,
         parent_splitter=None,  # 페이지 = parent
-        search_kwargs={"k": 1}
+        search_kwargs={"k": 2}
     )
 
     if db_exists and vectorstore._collection.count() > 0:

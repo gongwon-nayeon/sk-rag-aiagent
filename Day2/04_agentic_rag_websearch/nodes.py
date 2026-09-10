@@ -9,6 +9,8 @@ from prompts import (
     HALLUCINATION_GRADER_PROMPT,
     ANSWER_GRADER_PROMPT,
     QUERY_REWRITER_PROMPT,
+    SIMPLE_RESPONSE_SYSTEM_PROMPT,
+    GENERATE_SYSTEM_PROMPT,
 )
 from retriever import setup_retriever
 
@@ -19,6 +21,10 @@ llm = _get_llm()
 from dotenv import load_dotenv
 
 load_dotenv()
+
+# 재시도 상한 (무한 루프 방지)
+MAX_SEARCH_RETRY = 2
+MAX_HALLUCINATION_RETRY = 2
 
 
 # ===============================
@@ -61,6 +67,10 @@ def query_analysis(state: State):
     simple: 간단한 대화 → 직접 답변
     rag: AI 문서 검색 → retrieve
     web: 웹 검색 → web_search
+
+    그래프의 유일한 진입점이므로, 여기서 매 턴마다:
+    1) 사용자 질문을 messages에 HumanMessage로 추가하고 (멀티턴 대화 이력 유지)
+    2) 이전 턴에서 남은 검색/재시도 관련 스크래치 상태를 리셋한다.
     """
     print("##### QUERY ANALYSIS #####")
 
@@ -77,19 +87,30 @@ def query_analysis(state: State):
 
     print(f"Intent: {intent}")
 
-    return {"question": question, "intent": intent}
+    return {
+        "question": question,
+        "intent": intent,
+        "messages": [HumanMessage(content=question)],
+        # 새 턴 시작이므로 이전 턴의 검색 컨텍스트/재시도 카운터를 초기화
+        "document": "",
+        "source": "",
+        "retry_num": 0,
+        "hallucination_retry": 0,
+    }
 
 
 def simple_response(state: State):
     """
     간단한 대화에 대해 직접 답변합니다.
+    이전 대화 이력(messages)을 함께 전달하여 멀티턴 맥락을 반영합니다.
     """
     print("##### SIMPLE RESPONSE #####")
 
-    question = state["question"]
     llm = _get_llm()
+    system_msg = SystemMessage(SIMPLE_RESPONSE_SYSTEM_PROMPT)
+    history = state["messages"]
 
-    response = llm.invoke([HumanMessage(content=question)])
+    response = llm.invoke([system_msg] + history)
 
     print(f"Response: {response.content}")
 
@@ -123,7 +144,7 @@ def web_search(state: State):
     """
     print("##### WEB SEARCH #####")
 
-    from langchain_tavily import TavilySearch # type: ignore
+    from langchain_tavily import TavilySearch  # type: ignore
 
     question = state["question"]
     print(f"Question: {question}")
@@ -188,6 +209,7 @@ def generate(state: State):
     """
     검색된 문서를 기반으로 최종 답변을 생성합니다.
     RAG 문서 또는 웹 검색 결과를 모두 처리할 수 있습니다.
+    이전 대화 이력(messages)을 함께 전달하여 멀티턴 맥락을 반영합니다.
     """
     print("##### GENERATE #####")
 
@@ -200,32 +222,9 @@ def generate(state: State):
     print(f"Question: {question}")
     print(f"Context: {document[:100] if document else 'No context'}...")
 
-    # RAG 프롬프트 사용
     llm = _get_llm()
 
-    SYSTEM_PROMPT = """
-    당신은 관련 문서를 기반으로 답변하는 어시스턴트입니다.
-    주어진 문서 텍스트를 기반으로 사용자의 질문에 대해 충실히 답변하세요.
-
-    <rules>
-    - context에 제공된 문서의 출처를 언급하며 답변을 작성하세요.
-    - 문서가 RAG에서 온 경우: 파일명과 페이지 번호를 명시하세요.
-    - 문서가 웹 검색에서 온 경우: 출처 URL을 명시하세요.
-    - 답변은 마크다운 문법 형식으로 적절한 볼드체, 제목, 불렛 등을 사용하여 가독성 좋게 작성하세요.
-    </rules>
-
-    <output_format>
-    답변은 아래와 같은 예시를 참고하여 구조적으로 작성하세요:
-    [답변 본문]
-
-    ===
-    [출처]
-    - RAG 문서: 파일명과 페이지 번호
-    - 웹 검색: URL
-    </output_format>
-    """
-
-    system_msg = SystemMessage(SYSTEM_PROMPT)
+    system_msg = SystemMessage(GENERATE_SYSTEM_PROMPT)
     human_msg = HumanMessage(f"""
     다음은 주어진 문서 텍스트입니다.
     <context>
@@ -237,16 +236,22 @@ def generate(state: State):
     </question>
     """)
 
-    response = llm.invoke([system_msg, human_msg])
+    # 현재 턴의 질문(마지막 HumanMessage)은 위 human_msg로 대체해서 보내므로 제외하고,
+    # 그 이전까지의 대화 이력만 함께 전달해 멀티턴 맥락을 유지한다.
+    history = state["messages"][:-1]
+
+    response = llm.invoke([system_msg] + history + [human_msg])
 
     print(f"Response: {response.content[:100]}...")
 
     return {
-        "documents": document,
+        "document": document,
         "question": question,
         "generation": response.content,
         "messages": [response],
-        "retry_num": state.get("retry_num", 0)
+        "retry_num": state.get("retry_num", 0),
+        # generate가 호출될 때마다(최초 시도 및 환각으로 인한 재시도 포함) 1씩 증가
+        "hallucination_retry": state.get("hallucination_retry", 0) + 1,
     }
 
 
@@ -254,6 +259,9 @@ def transform_query(state: State):
     """
     검색 성능 향상을 위해 질문을 재작성합니다.
     재시도할 검색 대상(RAG/웹)에 맞춰 재작성 지침을 다르게 적용합니다.
+
+    재작성된 검색어는 내부 검색 최적화용일 뿐 실제 사용자 발화가 아니므로
+    messages(대화 이력)에는 추가하지 않는다.
     """
     print("##### TRANSFORM QUERY #####")
 
@@ -284,8 +292,7 @@ def transform_query(state: State):
 
     return {
         "question": better_question.content,
-        "messages": [better_question],
-        "retry_num": state.get("retry_num", 0) + 1
+        "retry_num": state.get("retry_num", 0) + 1,
     }
 
 
@@ -340,7 +347,7 @@ def decide_to_generate(state: State) -> Literal["transform_query", "generate", "
     if state["document"] != "":
         print("---DECISION: GENERATE---")
         return "generate"
-    elif state.get("retry_num", 0) < 2:
+    elif state.get("retry_num", 0) < MAX_SEARCH_RETRY:
         print("---DECISION: TRANSFORM QUERY---")
         return "transform_query"
     else:
@@ -351,9 +358,9 @@ def decide_to_generate(state: State) -> Literal["transform_query", "generate", "
 def grade_generation_v_documents_and_question(state: State) -> Literal["useful", "not useful", "not supported"]:
     """
     생성된 답변의 환각 여부와 유용성을 평가합니다.
-    useful: 환각 없고 유용함
+    useful: 환각 없고 유용함 (또는 재시도 상한 도달로 현재 답변을 최종 채택)
     not useful: 환각 없지만 유용하지 않음
-    not supported: 환각 발생
+    not supported: 환각 발생 (재시도 상한 이내인 경우에만 재생성)
     """
     print("##### CHECK HALLUCINATIONS #####")
 
@@ -386,12 +393,16 @@ def grade_generation_v_documents_and_question(state: State) -> Literal["useful",
         })
         grade = score.binary_score
 
-        if grade == "yes" or state.get("retry_num", 0) >= 2:  # 유용함
+        if grade == "yes" or state.get("retry_num", 0) >= MAX_SEARCH_RETRY:  # 유용함
             print("---DECISION: GENERATION ADDRESSES QUESTION---")
             return "useful"
         else:  # 유용하지 않음
             print("---DECISION: GENERATION DOES NOT ADDRESS QUESTION---")
             return "not useful"
     else:  # 환각 발생
+        if state.get("hallucination_retry", 0) >= MAX_HALLUCINATION_RETRY:
+            # 무한 루프 방지: 재시도 상한에 도달하면 현재 답변을 그대로 채택하고 종료
+            print("---DECISION: HALLUCINATION RETRY LIMIT REACHED, ACCEPT CURRENT ANSWER---")
+            return "useful"
         print("---DECISION: GENERATION IS NOT GROUNDED IN DOCUMENTS, RE-TRY---")
         return "not supported"
