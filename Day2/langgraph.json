@@ -1,0 +1,11 @@
+{
+  "dependencies": ["."],
+  "graphs": {
+    "01_basic_rag_chromadb": "01_basic_rag_chromadb.graph:create_graph",
+    "02_relevance_grading_rag": "02_relevance_grading_rag.graph:create_graph",
+    "03_hallucination_grading_rag": "03_hallucination_grading_rag.graph:create_graph",
+    "04_agentic_rag_websearch": "04_agentic_rag_websearch.graph:create_graph",
+    "05_plan_execute_agentic_rag": "05_plan_execute_agentic_rag.graph:create_graph"
+  },
+  "env": "./.env"
+}

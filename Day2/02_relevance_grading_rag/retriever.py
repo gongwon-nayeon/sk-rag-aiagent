@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 import fitz
 from langchain_core.documents import Document
@@ -9,10 +10,12 @@ from langchain_classic.retrievers import ParentDocumentRetriever
 from langchain_core.stores import InMemoryByteStore
 from langchain_core.tools import create_retriever_tool
 
+BASE_DIR = Path(__file__).resolve().parent.parent
+
 
 def setup_retriever():
-    file_path = "../dataset/(PDF)SPRi AI Brief 2026년 8월호.pdf"
-    persist_directory = "../chroma_db"
+    file_path = str(BASE_DIR / "dataset" / "(PDF)SPRi AI Brief 2026년 8월호.pdf")
+    persist_directory = str(BASE_DIR / "chroma_db")
     db_exists = os.path.isdir(persist_directory) and bool(os.listdir(persist_directory))
 
     # PyMuPDF로 문서 로드 (재사용 시에도 parent page 원본 복원을 위해 필요)

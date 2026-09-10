@@ -1,9 +1,9 @@
 from langgraph.graph import END, StateGraph, START
 from langgraph.prebuilt import ToolNode, tools_condition
 
-from state import State, InputState, OutputState
-from nodes import answer, chatbot
-from retriever import setup_retriever
+from .state import State, InputState, OutputState
+from .nodes import answer, chatbot
+from .retriever import setup_retriever
 
 # 모듈 레벨에서 한 번만 초기화
 _, retriever_tool = setup_retriever()

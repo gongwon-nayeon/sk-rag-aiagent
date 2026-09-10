@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage, SystemMessage
-from state import State, _get_llm
-from retriever import setup_retriever
+from .state import State, _get_llm
+from .retriever import setup_retriever
 
 # 모듈 레벨에서 한 번만 초기화
 _, retriever_tool = setup_retriever()

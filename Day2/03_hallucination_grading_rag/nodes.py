@@ -2,14 +2,14 @@ from typing import Literal
 from langchain_core.messages import HumanMessage, SystemMessage
 from pydantic import BaseModel, Field
 
-from state import State, _get_llm
-from prompts import (
+from .state import State, _get_llm
+from .prompts import (
     RELEVANCE_GRADER_PROMPT,
     HALLUCINATION_GRADER_PROMPT,
     ANSWER_GRADER_PROMPT,
     QUERY_REWRITER_PROMPT,
 )
-from retriever import setup_retriever
+from .retriever import setup_retriever
 
 # 모듈 레벨에서 한 번만 초기화
 retriever, retriever_tool = setup_retriever()
