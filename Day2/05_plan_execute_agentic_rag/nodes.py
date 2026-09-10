@@ -53,7 +53,9 @@ def _web_search(query: str) -> str:
 
 @tool
 def web_search_tool(query: str) -> str:
-    """웹에서 최신 정보나 각 항목의 공식 문서를 검색합니다."""
+    """웹에서 최신 정보나 각 항목의 공식 문서를 검색합니다.
+    query 인자는 검색창에 바로 입력할 간결한 키워드/구문으로 작성하세요
+    (예: 'OpenAI GPT-5.6 공식 발표'). 검색 방법이나 의도를 설명하는 문장은 넣지 마세요."""
     return _web_search(query)
 
 
