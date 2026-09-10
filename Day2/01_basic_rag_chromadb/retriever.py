@@ -11,7 +11,7 @@ from langchain_core.tools import create_retriever_tool
 
 
 def setup_retriever():
-    file_path = "../dataset/SPRi AI Brief 7월호_최종.pdf"
+    file_path = "../dataset/(PDF)SPRi AI Brief 2026년 8월호.pdf"
     persist_directory = "../chroma_db"
     db_exists = os.path.isdir(persist_directory) and bool(os.listdir(persist_directory))
 
