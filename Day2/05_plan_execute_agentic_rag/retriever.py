@@ -60,12 +60,14 @@ def setup_retriever():
     docstore = InMemoryByteStore()
 
     # ParentDocumentRetriever 생성
+    # k=2는 "전수 검색/전체 정리" 같은 넓은 범위의 질문에서 페이지가 거의 누락되어
+    # 답변이 부실해지는 원인이었으므로, 회수율을 높이기 위해 k를 늘린다.
     parent_retriever = ParentDocumentRetriever(
         vectorstore=vectorstore,
         docstore=docstore,
         child_splitter=child_splitter,
         parent_splitter=None,  # 페이지 = parent
-        search_kwargs={"k": 2}
+        search_kwargs={"k": 6}
     )
 
     if db_exists and vectorstore._collection.count() > 0:
@@ -99,8 +101,13 @@ def setup_retriever():
         parent_retriever,
         "retrieve_AI_brief",
         "dataset 폴더의 AI 관련 문서 전체에서 정보를 검색하고 반환합니다. "
-        "query 인자는 검색 엔진에 바로 입력할 핵심 키워드나 짧은 구/질문으로 작성하세요 "
-        "(예: 'OpenAI ChatGPT 신규 기능'). 검색 방법이나 절차를 설명하는 문장을 넣지 마세요.",
+        "이 검색은 문서 제목이나 파일명이 아니라 각 페이지 내용(문장)에 대한 벡터 유사도로 동작합니다. "
+        "query 인자는 실제로 문서 본문에 등장할 법한 구체적인 키워드/개체명/주제로 작성하세요 "
+        "(예: 'OpenAI ChatGPT 신규 기능', 'GPT-5.6 벤치마크 성능'). "
+        "'PDF', '전체 텍스트', '목차', 파일명, 문서 제목처럼 문서 자체를 가리키는 표현이나 "
+        "검색 방법/절차를 설명하는 문장은 쓰지 마세요 - 그런 단어는 본문 내용과 유사도가 낮아 "
+        "검색 품질이 크게 떨어집니다. 여러 동의어/표현을 폭넓게 찾아야 하면 한 번에 다 담으려 "
+        "하지 말고, 동의어별로 나눠 여러 번 호출하세요.",
         document_prompt=PromptTemplate.from_template(
         "{page_content} 파일명: {source} 문서 페이지: {page}"
     ),

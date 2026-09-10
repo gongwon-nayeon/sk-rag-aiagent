@@ -13,7 +13,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 def setup_retriever():
-    file_path = BASE_DIR / "dataset" / "(PDF)SPRi AI Brief 2026년 8월호.pdf"
+    file_path = BASE_DIR / "dataset" / "SPRi AI Brief 2026년 9월호.pdf"
     persist_directory = BASE_DIR / "chroma_db"
     db_exists = persist_directory.is_dir() and any(persist_directory.iterdir())
 
