@@ -1,4 +1,5 @@
 from typing import Literal, Union
+from datetime import date
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
 from langchain_core.tools import tool
 from langgraph.types import Send
@@ -117,6 +118,11 @@ def _format_transcript(messages: list) -> str:
     return "\n".join(lines) if lines else "(아직 진행된 내용 없음)"
 
 
+def _today() -> str:
+    """프롬프트에 넣을 오늘 날짜(년-월-일)를 반환합니다."""
+    return date.today().isoformat()
+
+
 # ===============================
 # Nodes
 # ===============================
@@ -140,7 +146,7 @@ def query_analysis(state: State):
     router = llm.with_structured_output(RouteQuery)
     chain = QUERY_ANALYSIS_PROMPT | router
 
-    result = chain.invoke({"question": question})
+    result = chain.invoke({"question": question, "current_date": _today()})
     intent = result.intent
 
     print(f"Intent: {intent}")
@@ -163,7 +169,7 @@ def simple_response(state: State):
     print("##### SIMPLE RESPONSE #####")
 
     llm = _get_llm()
-    system_msg = SystemMessage(SIMPLE_RESPONSE_SYSTEM_PROMPT)
+    system_msg = SystemMessage(SIMPLE_RESPONSE_SYSTEM_PROMPT.format(current_date=_today()))
     history = state["messages"]
 
     response = llm.invoke([system_msg] + history)
@@ -187,7 +193,7 @@ def plan_step(state: State):
     llm = _get_llm()
     planner = llm.with_structured_output(Plan)
     chain = PLANNER_PROMPT | planner
-    result = chain.invoke({"question": question})
+    result = chain.invoke({"question": question, "current_date": _today()})
 
     steps = result.steps or [question]
     print(f"Plan ({len(steps)} step(s)): {steps}")
@@ -223,7 +229,7 @@ def agent(state: State):
         f"필요하면 도구를 사용해 이 작업을 완수하세요."
     )
     response = llm_with_tools.invoke(
-        [SystemMessage(EXECUTE_STEP_SYSTEM_PROMPT)] + state["messages"] + [reminder]
+        [SystemMessage(EXECUTE_STEP_SYSTEM_PROMPT.format(current_date=_today()))] + state["messages"] + [reminder]
     )
 
     # reminder는 임시용이므로 저장하지 않고, AI의 응답만 대화 기록에 영구 반영한다
@@ -282,7 +288,13 @@ def replan_step(state: State):
         print(f"---SAFETY: {SAFETY_MAX_MESSAGES} MESSAGES REACHED, FORCE RESPONSE---")
         llm = _get_llm()
         forced = llm.invoke([
-            SystemMessage("지금까지 수집된 정보만으로 질문에 답하세요. 부족한 부분은 정직하게 밝히세요."),
+            SystemMessage(
+                f"오늘 날짜: {_today()}\n\n"
+                "지금까지 수집된 정보만으로 질문에 답하세요. 부족한 부분은 정직하게 밝히세요.\n"
+                "출처를 사용한 문장/수치 옆에는 [1], [2]처럼 번호를 매긴 인용 표시를 붙이고,\n"
+                "답변 맨 마지막에 '## 출처' 섹션을 만들어 RAG 문서는 `[n] 파일명, p.페이지번호`,\n"
+                "웹 출처는 `[n] URL` 형식으로 나열하세요."
+            ),
             HumanMessage(f"<question>{question}</question>\n<transcript>{_format_transcript(messages)}</transcript>"),
         ])
         return {"response": forced.content, "plan": []}
@@ -295,6 +307,7 @@ def replan_step(state: State):
         "question": question,
         "plan": "\n".join(plan) if plan else "(없음)",
         "transcript": _format_transcript(messages),
+        "current_date": _today(),
     })
 
     print(f"Reasoning: {output.reasoning}")
