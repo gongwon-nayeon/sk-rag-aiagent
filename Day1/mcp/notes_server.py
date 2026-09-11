@@ -1,11 +1,11 @@
-from mcp.server.fastmcp import FastMCP   # type: ignore
+from mcp.server.mcpserver import MCPServer   # type: ignore
 import json
 import os
 from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
 
-mcp = FastMCP("NotesManager")
+mcp = MCPServer("NotesManager")
 
 # 노트 저장 경로
 NOTES_DIR = Path("notes_data")

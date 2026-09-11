@@ -1,4 +1,4 @@
-from langchain_mcp_adapters.client import MultiServerMCPClient  # type: ignore
+from langchain.mcp import MCPAdapter
 from langchain.chat_models import init_chat_model
 from langchain.messages import SystemMessage, HumanMessage, ToolMessage
 
@@ -23,11 +23,11 @@ class AgentState(TypedDict):
     messages: Annotated[list, add_messages]
 
 
-async def create_remote_mcp_agent(client: MultiServerMCPClient):
+async def create_remote_mcp_agent(adapter: MCPAdapter):
     """원격 MCP 서버의 Tools를 사용하는 LangGraph Agent를 생성합니다."""
 
     # 원격 MCP Tools 로드
-    tools = await client.get_tools()
+    tools = await adapter.list_tools()
     tools_by_name = {tool.name: tool for tool in tools}
 
     # LLM에 Tools 바인딩
@@ -94,75 +94,69 @@ async def run():
 
     # 원격 MCP 서버 설정
     # LangChain 공식 문서 MCP 서버: https://docs.langchain.com/mcp
-    remote_server_config = {
-        "langchain-docs": {
-            "url": "https://docs.langchain.com/mcp",
-            "transport": "http",
-        },
-    }
+    remote_server_url = "https://docs.langchain.com/mcp"
 
     print("=" * 60)
     print("원격 MCP 서버 연결 중...")
-    print(f"Server URL: {remote_server_config['langchain-docs']['url']}")
+    print(f"Server URL: {remote_server_url}")
     print("=" * 60)
 
     try:
-        client = MultiServerMCPClient(remote_server_config)
+        async with MCPAdapter(remote_server_url) as adapter:
+            agent = await create_remote_mcp_agent(adapter)
 
-        agent = await create_remote_mcp_agent(client)
+            print("\n" + "=" * 60)
+            print("LangChain 문서 기반 Agent")
+            print("=" * 60)
+            print("LangChain 공식 문서를 검색하여 질문에 답변합니다.")
+            print("\n예시 질문:")
+            print("  - LangGraph의 특징에 대해 알려주세요.")
+            print("  - 랭체인의 create_agent 사용법(파이썬) 알려주세요.")
+            print("  - 랭체인을 처음 사용하는 사람이 읽으면 좋은 문서는?")
+            print("  - langchain-openai 사용법 알려주세요.")
+            print("=" * 60)
 
-        print("\n" + "=" * 60)
-        print("LangChain 문서 기반 Agent")
-        print("=" * 60)
-        print("LangChain 공식 문서를 검색하여 질문에 답변합니다.")
-        print("\n예시 질문:")
-        print("  - LangGraph의 특징에 대해 알려주세요.")
-        print("  - 랭체인의 create_agent 사용법(파이썬) 알려주세요.")
-        print("  - 랭체인을 처음 사용하는 사람이 읽으면 좋은 문서는?")
-        print("  - langchain-openai 사용법 알려주세요.")
-        print("=" * 60)
+            # 사용자 입력
+            user_input = input("\n질문을 입력하세요: ")
 
-        # 사용자 입력
-        user_input = input("\n질문을 입력하세요: ")
+            initial_messages = [HumanMessage(content=user_input)]
 
-        initial_messages = [HumanMessage(content=user_input)]
+            # Agent 실행
+            print("\n=====AGENT 실행 중=====\n")
+            result = await agent.ainvoke({
+                "messages": initial_messages,
+            })
 
-        # Agent 실행
-        print("\n=====AGENT 실행 중=====\n")
-        result = await agent.ainvoke({
-            "messages": initial_messages,
-        })
+            # 결과 출력
+            print("\n" + "=" * 60)
+            print("실행 결과:")
+            print("=" * 60)
 
-        # 결과 출력
-        print("\n" + "=" * 60)
-        print("실행 결과:")
-        print("=" * 60)
-
-        def print_message_with_limit(msg, max_length=500):
-            """메시지를 길이 제한과 함께 출력합니다."""
-            if hasattr(msg, 'type') and msg.type == "tool":
-                # ToolMessage인 경우 내용 제한
-                print(f"\n[Tool Result: {msg.name if hasattr(msg, 'name') else 'Unknown'}]")
-                content = str(msg.content)
-                if len(content) > max_length:
-                    print(content[:max_length] + f"...\n(생략됨: {len(content) - max_length}자)")
+            def print_message_with_limit(msg, max_length=500):
+                """메시지를 길이 제한과 함께 출력합니다."""
+                if hasattr(msg, 'type') and msg.type == "tool":
+                    # ToolMessage인 경우 내용 제한
+                    print(f"\n[Tool Result: {msg.name if hasattr(msg, 'name') else 'Unknown'}]")
+                    content = str(msg.content)
+                    if len(content) > max_length:
+                        print(content[:max_length] + f"...\n(생략됨: {len(content) - max_length}자)")
+                    else:
+                        print(content)
+                elif hasattr(msg, 'tool_calls') and msg.tool_calls:
+                    # AIMessage with tool_calls
+                    print(f"\n[AI] Tool 호출 요청:")
+                    for tc in msg.tool_calls:
+                        args_str = str(tc.get('args', {}))
+                        if len(args_str) > 200:
+                            args_str = args_str[:200] + "..."
+                        print(f"  📌 {tc.get('name')}: {args_str}")
                 else:
-                    print(content)
-            elif hasattr(msg, 'tool_calls') and msg.tool_calls:
-                # AIMessage with tool_calls
-                print(f"\n[AI] Tool 호출 요청:")
-                for tc in msg.tool_calls:
-                    args_str = str(tc.get('args', {}))
-                    if len(args_str) > 200:
-                        args_str = args_str[:200] + "..."
-                    print(f"  📌 {tc.get('name')}: {args_str}")
-            else:
-                msg.pretty_print()
+                    msg.pretty_print()
 
-        for msg in result["messages"]:
-            print_message_with_limit(msg, max_length=500)
+            for msg in result["messages"]:
+                print_message_with_limit(msg, max_length=500)
 
-        print("\n" + "=" * 60)
+            print("\n" + "=" * 60)
 
     except Exception as e:
         print(f"\n오류 발생: {e}")

@@ -53,7 +53,7 @@ cd mcp
 python notes_client.py
 ```
 
-**참고**: `notes_client.py` 내부에서 `StdioServerParameters`로 `notes_server.py`를 subprocess로 자동 실행하므로 별도로 서버를 실행할 필요가 없습니다.
+**참고**: `notes_client.py` 내부에서 `MCPAdapter`가 `notes_server.py`를 subprocess로 자동 실행하므로 별도로 서버를 실행할 필요가 없습니다.
 
 ### 대화 예시
 
@@ -79,7 +79,7 @@ python notes_client.py
   - 제공 기능: LangChain 문서 검색 및 조회
 
 - **Client** (`remote_langchain_docs_client.py`):
-  - `MultiServerMCPClient`로 원격 서버 연결
+  - `MCPAdapter`로 원격 서버 연결
 
 ### 실행 방법
 
