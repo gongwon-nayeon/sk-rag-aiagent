@@ -26,9 +26,6 @@ cd Day2
 # 가상환경 활성화 (macOS/Linux)
 source .venv/bin/activate
 
-# 04_agentic_rag_websearch 폴더로 이동
-cd 04_agentic_rag_websearch
-
 # LangGraph Studio 실행
 uv run langgraph dev
 ```

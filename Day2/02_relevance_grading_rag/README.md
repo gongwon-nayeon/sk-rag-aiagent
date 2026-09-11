@@ -36,9 +36,6 @@ cd Day2
 # 가상환경 활성화 (macOS/Linux)
 source .venv/bin/activate
 
-# 02_relevance_grading_rag 폴더로 이동
-cd 02_relevance_grading_rag
-
 # LangGraph Studio 실행
 uv run langgraph dev
 ```
