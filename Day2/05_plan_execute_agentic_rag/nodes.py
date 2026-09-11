@@ -139,6 +139,17 @@ def _today() -> str:
     return date.today().isoformat()
 
 
+def _tool_descriptions() -> str:
+    """실제 도구 객체의 name/description을 그대로 읽어 TOOL_USAGE_GUIDE에 주입합니다.
+    도구 설명을 프롬프트에 따로 하드코딩하지 않고 이 함수 하나만 거치게 해서, 도구 설명이
+    바뀌면(retriever.py/web_search_tool docstring) 플래너/재계획자도 자동으로 최신 설명을
+    보게 된다."""
+    return (
+        f"- {retriever_tool.name}: {retriever_tool.description}\n"
+        f"- {web_search_tool.name}: {web_search_tool.description}"
+    )
+
+
 # ===============================
 # Nodes
 # ===============================
@@ -210,7 +221,11 @@ def plan_step(state: State):
     llm = _get_llm()
     planner = llm.with_structured_output(Plan)
     chain = PLANNER_PROMPT | planner
-    result = chain.invoke({"question": question, "current_date": _today()})
+    result = chain.invoke({
+        "question": question,
+        "current_date": _today(),
+        "tool_descriptions": _tool_descriptions(),
+    })
 
     steps = [s.model_dump() for s in result.steps] or [
         {"tool": "web_search_tool", "goal": question}
@@ -340,6 +355,7 @@ def replan_step(state: State):
         "plan": _format_plan(plan),
         "transcript": _format_transcript(messages),
         "current_date": _today(),
+        "tool_descriptions": _tool_descriptions(),
     })
 
     print(f"Reasoning: {output.reasoning}")
