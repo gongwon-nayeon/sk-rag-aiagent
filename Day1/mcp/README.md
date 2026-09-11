@@ -38,8 +38,6 @@ source .venv/bin/activate
 cd mcp
 ```
 
-가상환경이 활성화된 상태에서 아래 실습을 진행하세요.
-
 ---
 
 
@@ -52,6 +50,12 @@ cd mcp
 ```bash
 python notes_client.py
 ```
+혹은
+
+```bash
+uv run python notes_client.py
+```
+
 
 **참고**: `notes_client.py` 내부에서 `MCPAdapter`가 `notes_server.py`를 subprocess로 자동 실행하므로 별도로 서버를 실행할 필요가 없습니다.
 
@@ -89,6 +93,12 @@ python notes_client.py
 python remote_langchain_docs_client.py
 ```
 
+혹은
+
+```bash
+uv run python remote_langchain_docs_client.py
+```
+
 ### 대화 예시
 
 실행 후 다음과 같은 질문을 시도해보세요:
@@ -96,6 +106,6 @@ python remote_langchain_docs_client.py
 > - 랭체인에서 도구(툴) 만드는법 알려줘
 > - 랭체인의 create_agent 사용법(파이썬) 알려주세요.
 > - 랭체인을 처음 사용하는 사람이 읽으면 좋은 문서는?
-> - langchain-openai 사용법 알려주세요.
+> - 랭체인으로 mcp 등록해서 사용하는법 파이썬 기준으로 알려주세요.
 
 
