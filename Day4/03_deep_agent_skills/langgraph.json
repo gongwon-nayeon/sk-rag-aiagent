@@ -1,7 +1,8 @@
 {
   "dependencies": ["."],
   "graphs": {
-    "agent": "./graph.py:create_langgraph_doc_assistant"
+    "agent": "./graph.py:create_langgraph_doc_assistant",
+    "my_skill_agent": "./graph_practice.py:create_custom_skill_agent"
   },
   "env": "../.env"
 }

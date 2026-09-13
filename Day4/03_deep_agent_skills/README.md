@@ -59,38 +59,25 @@ Skills는 재사용 가능한 도메인 지식과 워크플로우를 패키징�
    - 문서 내용을 기반으로 사용자 요청 완료
 
 
-### 새로운 Skill 추가
+## 실행
 
-1. `skills/` 폴더에 새 디렉터리 생성:
+### 랭그래프 스튜디오 실행
+
 ```bash
-mkdir skills/another-docs
+uv run langgraph dev --allow-blocking
 ```
 
-2. `SKILL.md` 파일 작성:
-```markdown
----
-name: another-docs
-description: Fetches and references documentation for another framework
----
+### 예시 질문
 
-# another-docs
+- 랭체인으로 SQL 에이전트 만드는법
+- 랭체인으로 MCP 서버 연결하는법 예제
 
-## Workflow
-1. Fetch the documentation index
-2. Select relevant URLs
-3. Fetch and apply
-```
 
-3. Agent가 자동으로 새 skill 인식!
+## 나만의 Skill 만들어 적용하기
 
-### fetch_url 도구 커스터마이징
-
-`graph.py`의 `fetch_url` 함수를 수정하여 추가 기능을 구현할 수 있습니다:
-```python
-def fetch_url(url: str) -> str:
-    # 캐싱 추가
-    # 인증 헤더 추가
-    # 재시도 로직 구현
-    # 등등...
-    pass
-```
+1. 어떤 Skill을 만들지 정하기 (예: 특정 도메인 문서 검색, 계산, API 조회 등)
+2. make_skill_tool_prompt.txt 맨 아래 요구사항란에 그 내용을 적어 AI 툴 (ChatGPT 등)에 입력
+3. 생성된 결과 중 SKILL.md 부분 → skills/my-skill-name/SKILL.md에 덮어쓰기
+4. 생성된 tool 코드 → graph_practice.py의 TODO 위치에 삽입하고 tools 리스트에 추가
+   - Skill에서 언급한 tool 이름과 실제 함수명이 동일한지 확인
+5. `uv run langgraph dev --allow-blocking`로 실행 후, 해당 Skill이 트리거되는 질문을 던져서 테스트
