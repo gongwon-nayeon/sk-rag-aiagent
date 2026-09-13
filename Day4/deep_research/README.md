@@ -1,5 +1,7 @@
 # Deep Research Agent
 
+![alt text](image.png)
+
 ## 실습 환경 설정
 
 ### 사전 요구사항

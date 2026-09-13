@@ -36,7 +36,7 @@ requires = ["setuptools>=73.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ["research_agent"]
+packages = ["research_agent", "report_writer_agent"]
 
 [tool.setuptools.package-data]
 "*" = ["py.typed"]
