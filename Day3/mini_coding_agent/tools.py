@@ -2,6 +2,21 @@ import os
 import glob as glob_module
 from langchain.tools import tool
 
+# 프로세스의 cwd에 의존하지 않도록, 이 파일 위치를 기준으로 프로젝트 루트를 고정한다.
+# (mini_coding_agent/ 의 부모 = Day3/). 도구는 루트 전체를 대상으로 동작하며,
+# 새 파일 저장 위치(workspace/)는 system prompt의 안내로만 강제된다.
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+WORKSPACE_DIR = os.path.join(PROJECT_ROOT, "workspace")
+os.makedirs(WORKSPACE_DIR, exist_ok=True)
+
+
+def _resolve_path(filepath: str) -> str:
+    """상대 경로를 프로젝트 루트(Day3/) 기준으로 해석합니다."""
+    if os.path.isabs(filepath):
+        return filepath
+
+    return os.path.join(PROJECT_ROOT, filepath)
+
 
 # ============================================
 # 1. 코드 실행 도구 (Python REPL)
@@ -34,8 +49,8 @@ def execute_python(code: str) -> str:
                 f"❌ 실행 차단: interactive 함수 감지 ({pattern})\n\n"
                 "interactive 입력이 필요한 프로그램은 execute_python으로 실행할 수 없습니다.\n"
                 "대신 write_file로 파일을 저장한 후, 사용자가 직접 실행하도록 안내하세요.\n\n"
-                "예: write_file(filepath='../workspace/calculator.py', content=...)\n"
-                "   → '파일이 저장되었습니다. 터미널에서 python ../workspace/calculator.py로 실행하세요.'"
+                "예: write_file(filepath='./workspace/calculator.py', content=...)\n"
+                "   → '파일이 저장되었습니다. 터미널에서 python ./workspace/calculator.py로 실행하세요.'"
             )
 
     try:
@@ -92,10 +107,11 @@ def read_file(filepath: str) -> str:
         파일 내용 또는 에러 메시지
     """
     try:
-        if not os.path.exists(filepath):
+        resolved_path = _resolve_path(filepath)
+        if not os.path.exists(resolved_path):
             return f"❌ 파일을 찾을 수 없습니다: {filepath}"
 
-        with open(filepath, 'r', encoding='utf-8') as f:
+        with open(resolved_path, 'r', encoding='utf-8') as f:
             content = f.read()
 
         line_count = len(content.split('\n'))
@@ -118,12 +134,13 @@ def write_file(filepath: str, content: str) -> str:
         성공/실패 메시지
     """
     try:
+        resolved_path = _resolve_path(filepath)
         # 디렉토리가 없으면 생성
-        directory = os.path.dirname(filepath)
+        directory = os.path.dirname(resolved_path)
         if directory and not os.path.exists(directory):
             os.makedirs(directory, exist_ok=True)
 
-        with open(filepath, 'w', encoding='utf-8') as f:
+        with open(resolved_path, 'w', encoding='utf-8') as f:
             f.write(content)
 
         line_count = len(content.split('\n'))
@@ -147,10 +164,11 @@ def edit_file(filepath: str, old_content: str, new_content: str) -> str:
         성공/실패 메시지
     """
     try:
-        if not os.path.exists(filepath):
+        resolved_path = _resolve_path(filepath)
+        if not os.path.exists(resolved_path):
             return f"❌ 파일을 찾을 수 없습니다: {filepath}"
 
-        with open(filepath, 'r', encoding='utf-8') as f:
+        with open(resolved_path, 'r', encoding='utf-8') as f:
             content = f.read()
 
         if old_content not in content:
@@ -158,7 +176,7 @@ def edit_file(filepath: str, old_content: str, new_content: str) -> str:
 
         new_file_content = content.replace(old_content, new_content, 1)
 
-        with open(filepath, 'w', encoding='utf-8') as f:
+        with open(resolved_path, 'w', encoding='utf-8') as f:
             f.write(new_file_content)
 
         return f"✅ 파일 수정 성공: {filepath}"
@@ -174,7 +192,7 @@ def grep_search(pattern: str, directory: str = ".", file_pattern: str = "*.py") 
 
     Args:
         pattern: 검색할 패턴 (문자열)
-        directory: 검색할 디렉토리 (기본값: 현재 디렉토리)
+        directory: 검색할 디렉토리 (기본값: 프로젝트 루트)
         file_pattern: 파일 패턴 (기본값: *.py)
 
     Returns:
@@ -182,7 +200,8 @@ def grep_search(pattern: str, directory: str = ".", file_pattern: str = "*.py") 
     """
     try:
         results = []
-        search_pattern = os.path.join(directory, "**", file_pattern)
+        resolved_directory = _resolve_path(directory)
+        search_pattern = os.path.join(resolved_directory, "**", file_pattern)
 
         for filepath in glob_module.glob(search_pattern, recursive=True):
             try:
@@ -209,13 +228,14 @@ def glob(pattern: str, directory: str = ".") -> str:
 
     Args:
         pattern: 파일 패턴 (예: *.py, **/*.md)
-        directory: 검색할 디렉토리
+        directory: 검색할 디렉토리 (기본값: 프로젝트 루트)
 
     Returns:
         일치하는 파일 목록
     """
     try:
-        search_pattern = os.path.join(directory, pattern)
+        resolved_directory = _resolve_path(directory)
+        search_pattern = os.path.join(resolved_directory, pattern)
         files = glob_module.glob(search_pattern, recursive=True)
 
         if files:

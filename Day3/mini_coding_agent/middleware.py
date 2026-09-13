@@ -10,6 +10,8 @@ from langchain.agents.middleware import (
 )
 from langgraph.runtime import Runtime
 
+from tools import PROJECT_ROOT
+
 # ============================================
 # 1. Workspace Index Middleware (커스텀)
 # ============================================
@@ -26,7 +28,8 @@ def workspace_index_middleware(state: AgentState, runtime: Runtime) -> dict[str,
     """
     print("\n[Workspace Index] 파일 인덱싱 시작...")
 
-    cwd = os.getcwd()
+    # 프로세스 cwd가 아니라 항상 실제 프로젝트 루트(Day3/)를 기준으로 인덱싱
+    cwd = PROJECT_ROOT
     file_list = []
 
     # workspace 스캔 (최대 3단계 깊이, 모든 파일/폴더 대상)
