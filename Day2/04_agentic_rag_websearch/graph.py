@@ -17,25 +17,6 @@ from .nodes import (
 
 
 def create_agent_graph():
-    """
-    Query Analysis 기반 RAG + Web Search 에이전트 그래프 (멀티턴 지원 최종본).
-
-    흐름:
-    1. query_analysis: LLM이 질문 의도 분류 (simple/rag/web)
-       - 그래프의 유일한 진입점: 사용자 질문을 messages에 HumanMessage로 추가하고,
-         이전 턴에서 남은 document/source/retry_num/hallucination_retry를 리셋한다.
-    2. route_question: 분류 결과에 따라 라우팅
-       - simple → simple_response → END
-       - rag → retrieve → grade_documents → generate/transform_query/web_search
-       - web → web_search → generate
-    3. transform_query: 쿼리 재작성 후 원래 문서를 만들어낸 노드(retrieve 또는 web_search)로 루프백 (최대 2회)
-       RAG 재작성 후에도 관련 문서를 못 찾으면 web_search로 context 보강 (Corrective RAG)
-       재작성된 검색어는 내부용이므로 messages에는 남기지 않는다.
-    4. generate → grade_generation_v_documents_and_question: 환각/유용성 평가
-       - not supported → generate (재생성, 최대 2회까지만 재시도 후 강제 채택)
-       - useful → END (종료)
-       - not useful → transform_query (쿼리 재작성 후 source에 따라 retrieve/web_search로 재시도)
-    """
     graph_builder = StateGraph(State, input_schema=InputState, output_schema=OutputState)
 
     # 노드 추가
