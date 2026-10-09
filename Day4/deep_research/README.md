@@ -18,3 +18,4 @@ uv run langgraph dev --no-reload --allow-blocking
 - AI Agent의 Harness Engineering 의 개요를 알려줘
 - LangChain의 Deep Agents에 대해 조사해주세요.
 - AI Agent의 그래프 엔지니어링에 대해 정리해주세요.
+- 에이전틱 워크플로의 다양한 도메인별 적용 사례에 대해 정리해주세요.

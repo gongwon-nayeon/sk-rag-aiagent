@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LangChain Deep Agents 조사 보고서</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --paper: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --border: #e5e7eb;
+      --soft: #eff6ff;
+      --code-bg: #111827;
+      --code-text: #e5e7eb;
+      --accent: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", Arial, sans-serif;
+      line-height: 1.75;
+    }
+
+    a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    a:hover {
+      color: var(--primary-dark);
+      text-decoration: underline;
+    }
+
+    .page {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 40px 20px 72px;
+    }
+
+    .report {
+      background: var(--paper);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      border: 1px solid rgba(229, 231, 235, 0.9);
+    }
+
+    header.hero {
+      padding: 56px 56px 40px;
+      background:
+        radial-gradient(circle at top left, rgba(37, 99, 235, 0.16), transparent 36%),
+        linear-gradient(135deg, #0f172a 0%, #1e3a8a 56%, #2563eb 100%);
+      color: #ffffff;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.12);
+      font-size: 0.86rem;
+      letter-spacing: 0.02em;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.1rem, 5vw, 3.6rem);
+      line-height: 1.12;
+      letter-spacing: -0.04em;
+      font-weight: 800;
+    }
+
+    .subtitle {
+      margin: 18px 0 0;
+      max-width: 820px;
+      color: rgba(255, 255, 255, 0.86);
+      font-size: 1.12rem;
+    }
+
+    main {
+      padding: 0 56px 56px;
+    }
+
+    .toc {
+      margin: 34px 0;
+      padding: 28px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: #fbfdff;
+    }
+
+    .toc h2 {
+      margin-top: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+      font-size: 1.25rem;
+    }
+
+    .toc ol {
+      margin: 12px 0 0;
+      padding-left: 22px;
+      display: grid;
+      gap: 8px;
+    }
+
+    section {
+      margin: 44px 0;
+    }
+
+    h2 {
+      margin: 0 0 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      font-size: 1.86rem;
+      line-height: 1.35;
+      letter-spacing: -0.025em;
+    }
+
+    h3 {
+      margin: 30px 0 12px;
+      font-size: 1.28rem;
+      line-height: 1.45;
+      letter-spacing: -0.015em;
+    }
+
+    p {
+      margin: 14px 0;
+    }
+
+    strong {
+      font-weight: 750;
+    }
+
+    .executive {
+      margin-top: 12px;
+      padding: 30px;
+      border-radius: 20px;
+      background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+      border: 1px solid #dbeafe;
+    }
+
+    .key-findings {
+      margin-top: 24px;
+      padding: 24px;
+      border-radius: 16px;
+      background: #f9fafb;
+      border: 1px solid var(--border);
+    }
+
+    .key-findings h3 {
+      margin-top: 0;
+    }
+
+    ul, ol {
+      padding-left: 24px;
+    }
+
+    li {
+      margin: 8px 0;
+    }
+
+    .citation {
+      font-weight: 650;
+      white-space: nowrap;
+    }
+
+    .table-wrap {
+      margin: 24px 0;
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: #ffffff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 720px;
+    }
+
+    th, td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+      text-align: left;
+    }
+
+    th {
+      background: #f3f6fb;
+      color: #111827;
+      font-weight: 750;
+      white-space: nowrap;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.93em;
+      padding: 0.16em 0.38em;
+      border-radius: 6px;
+      background: #eef2ff;
+      color: #3730a3;
+    }
+
+    pre {
+      margin: 20px 0;
+      padding: 18px 20px;
+      overflow-x: auto;
+      border-radius: 16px;
+      background: var(--code-bg);
+      color: var(--code-text);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      line-height: 1.55;
+    }
+
+    pre code {
+      padding: 0;
+      background: transparent;
+      color: inherit;
+      font-size: 0.92rem;
+    }
+
+    .chart-section {
+      margin: 34px 0;
+      padding: 26px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: #ffffff;
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+    }
+
+    .chart-section h3 {
+      margin-top: 0;
+    }
+
+    .chart-note {
+      color: var(--muted);
+      font-size: 0.94rem;
+      margin-top: 8px;
+    }
+
+    .chart-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 24px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin: 24px 0;
+    }
+
+    .stat-card {
+      padding: 18px;
+      border-radius: 16px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+    }
+
+    .stat-card .label {
+      display: block;
+      color: var(--muted);
+      font-size: 0.86rem;
+      margin-bottom: 6px;
+    }
+
+    .stat-card .value {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.02em;
+    }
+
+    .callout {
+      margin: 22px 0;
+      padding: 20px 22px;
+      border-left: 4px solid var(--primary);
+      border-radius: 14px;
+      background: var(--soft);
+    }
+
+    .sources {
+      margin-top: 56px;
+      padding-top: 28px;
+      border-top: 2px solid var(--border);
+    }
+
+    .sources ol {
+      padding-left: 0;
+      list-style-position: inside;
+    }
+
+    .sources li {
+      margin: 10px 0;
+      word-break: break-word;
+    }
+
+    @media (max-width: 820px) {
+      .page {
+        padding: 20px 12px 40px;
+      }
+
+      header.hero {
+        padding: 36px 24px 30px;
+      }
+
+      main {
+        padding: 0 24px 38px;
+      }
+
+      .toc, .executive, .key-findings, .chart-section {
+        padding: 20px;
+      }
+
+      .stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      h2 {
+        font-size: 1.55rem;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .stats {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <article class="report">
+      <header class="hero">
+        <div class="eyebrow">Research Report</div>
+        <h1>LangChain Deep Agents 조사 보고서</h1>
+        <p class="subtitle">Deep Agents가 기존 LangChain 에이전트·LangGraph와 무엇이 다르고, 리서치·코딩·업무 자동화에서 언제 실무적으로 적합한지 정리한 보고서</p>
+      </header>
+
+      <main>
+        <nav class="toc" aria-labelledby="toc-title">
+          <h2 id="toc-title">목차</h2>
+          <ol>
+            <li><a href="#1-deep-agents의-정체와-등장-배경">Deep Agents의 정체와 등장 배경</a></li>
+            <li><a href="#2-핵심-구조-장기-작업을-위한-네-가지-실행-장치">핵심 구조: 장기 작업을 위한 네 가지 실행 장치</a></li>
+            <li><a href="#3-설치와-기본-사용법-create_deep_agent-중심-api">설치와 기본 사용법: <code>create_deep_agent</code> 중심 API</a></li>
+            <li><a href="#4-적합한-활용-영역-리서치코딩업무-자동화">적합한 활용 영역: 리서치·코딩·업무 자동화</a></li>
+            <li><a href="#5-langgraph와의-관계-고수준-하네스와-저수준-런타임의-결합">LangGraph와의 관계: 고수준 하네스와 저수준 런타임의 결합</a></li>
+            <li><a href="#6-경쟁-프레임워크와-비교-deep-agents가-강한-지점">경쟁 프레임워크와 비교: Deep Agents가 강한 지점</a></li>
+            <li><a href="#7-도입-시-주의점-권한비용평가-체계를-먼저-설계해야-한다">도입 시 주의점: 권한·비용·평가 체계를 먼저 설계해야 한다</a></li>
+            <li><a href="#8-최신-상태와-실무적-결론">최신 상태와 실무적 결론</a></li>
+          </ol>
+        </nav>
+
+        <section class="executive" id="executive-summary">
+          <h2>Executive Summary</h2>
+          <p><strong>LangChain Deep Agents</strong>는 단순한 챗봇 프레임워크가 아니라, 긴 시간 동안 여러 도구를 호출하고 중간 산출물을 관리해야 하는 작업을 위해 만들어진 <strong>배터리 포함형 에이전트 하네스(agent harness)</strong>다. LangChain 공식 문서는 Deep Agents를 파일시스템, 하위 에이전트, 장기 메모리, 컨텍스트 관리, human-in-the-loop 등을 기본 제공하는 장기 작업용 에이전트 구축 도구로 설명한다<a class="citation" href="#source-1">[1]</a>.</p>
+
+          <p>핵심 질문은 “Deep Agents가 기존 LangChain 에이전트나 LangGraph와 무엇이 다르고, 실제로 언제 써야 하는가”다. 결론부터 말하면, <strong>간단한 질의응답이나 단일 API 호출에는 과하지만, 리서치·코딩·문서 작성·데이터 분석·업무 자동화처럼 긴 실행, 파일 기반 중간 결과, 사람 승인, 하위 작업 분리가 필요한 경우에는 강력한 선택지</strong>다<a class="citation" href="#source-1">[1]</a><a class="citation" href="#source-3">[3]</a><a class="citation" href="#source-6">[6]</a>. 다만 기본적으로 LLM이 도구를 호출하는 구조이므로, 보안 경계는 모델이 아니라 <strong>도구 권한·샌드박스·승인 정책·관측성</strong>에서 만들어야 한다<a class="citation" href="#source-6">[6]</a><a class="citation" href="#source-8">[8]</a>.</p>
+
+          <div class="key-findings">
+            <h3>Key Findings</h3>
+            <ul>
+              <li><strong>Deep Agents는 LangGraph 위에 올라간 고수준 하네스</strong>다. LangGraph의 durable execution, streaming, persistence, human-in-the-loop 같은 실행 능력을 활용하면서, 파일시스템·subagents·memory·skills·summarization을 미리 조립해 제공한다<a class="citation" href="#source-1">[1]</a><a class="citation" href="#source-6">[6]</a>.</li>
+              <li>초기 LangChain 블로그는 성공적인 “deep agent”의 공통 패턴을 <strong>상세한 시스템 프롬프트, planning tool, subagents, file system</strong> 네 가지로 정리했다<a class="citation" href="#source-2">[2]</a>. 현재 Deep Agents는 이 패턴을 공식 SDK 형태로 제품화한 것으로 볼 수 있다<a class="citation" href="#source-1">[1]</a><a class="citation" href="#source-6">[6]</a>.</li>
+              <li>현재 공식 API의 핵심 함수는 <code>create_deep_agent</code>이며, 인자명은 <code>instructions</code>가 아니라 <strong><code>system_prompt</code></strong>다. 주요 인자로 <code>model</code>, <code>tools</code>, <code>middleware</code>, <code>subagents</code>, <code>skills</code>, <code>memory</code>, <code>permissions</code>, <code>backend</code>, <code>interrupt_on</code>, <code>checkpointer</code>, <code>store</code>, <code>cache</code> 등이 지원된다<a class="citation" href="#source-4">[4]</a>.</li>
+              <li><strong>Planning/todo는 현재 기본값이 아니라 opt-in</strong>이다. v0.7부터는 <code>TodoListMiddleware()</code>를 명시적으로 추가해야 <code>write_todos</code> 계획 도구를 사용할 수 있다<a class="citation" href="#source-1">[1]</a><a class="citation" href="#source-3">[3]</a>.</li>
+              <li>GitHub Releases 기준 Deep Agents SDK 최신 릴리스는 <strong><code>deepagents==0.7.23</code></strong>이며, 2026년 10월 7일 릴리스로 표시된다. 별도 터미널 코딩 에이전트 패키지인 <code>deepagents-code</code>와는 구분해야 한다<a class="citation" href="#source-7">[7]</a>.</li>
+            </ul>
+          </div>
+        </section>
+
+        <section class="chart-section" aria-labelledby="report-data-title">
+          <h3 id="report-data-title">보고서 내 비교 항목 개요</h3>
+          <p>아래 차트는 본 보고서의 표와 본문에서 명시적으로 정리된 비교 항목 수를 시각화한 것이다. 핵심 실행 구성요소 5개, <code>create_deep_agent</code> 주요 인자 13개, LangChain/LangGraph/Deep Agents 계층 3개, 경쟁·관련 프레임워크 7개, 도입 리스크 5개가 정리되어 있다.</p>
+          <div class="chart-grid">
+            <canvas id="overviewChart" height="120"></canvas>
+          </div>
+          <p class="chart-note">항목 수는 본문 표에 제시된 행 또는 명시적으로 나열된 항목을 기준으로 산정했다.</p>
+        </section>
+
+        <section id="1-deep-agents의-정체와-등장-배경">
+          <h2>1. Deep Agents의 정체와 등장 배경</h2>
+          <p>Deep Agents를 이해하려면 먼저 “에이전트 루프”와 “긴 작업을 완수하는 실행 환경”을 구분해야 한다. 기본적인 LLM 에이전트는 모델이 메시지를 읽고, 필요한 도구를 호출하고, 도구 결과를 다시 보고 다음 행동을 결정하는 반복 구조다. 이 구조만으로도 간단한 검색, 계산, API 호출은 가능하지만, 수십 단계에 걸친 조사나 코드 수정처럼 중간 산출물이 많고 실패 가능성이 높은 작업에서는 쉽게 얕아진다<a class="citation" href="#source-2">[2]</a>.</p>
+
+          <p>LangChain 창업자 Harrison Chase는 2025년 7월 30일 글에서 OpenAI Deep Research, Manus, Claude Code 같은 장기 작업형 에이전트의 공통점을 분석하며, 단순한 도구 호출 루프만으로는 “deep”한 결과를 만들기 어렵다고 설명했다. 그가 제시한 공통 패턴은 <strong>상세한 시스템 프롬프트, planning tool, subagents, file system</strong>이다<a class="citation" href="#source-2">[2]</a>. Deep Agents는 이 네 가지 패턴을 LangChain/LangGraph 생태계에서 바로 쓸 수 있도록 묶은 오픈소스 패키지다<a class="citation" href="#source-1">[1]</a><a class="citation" href="#source-6">[6]</a>.</p>
+
+          <p>따라서 Deep Agents는 LangChain의 <code>create_agent</code>를 대체하는 단순 래퍼라기보다, 장기 실행에 필요한 운영 장치를 포함한 상위 레이어다. LangChain은 모델·도구·메시지·미들웨어 같은 구성 요소를 제공하고, LangGraph는 상태 기반 실행, 체크포인팅, 스트리밍, interrupt를 맡는다. Deep Agents는 그 위에서 파일시스템, 하위 에이전트, 메모리, 스킬, 요약, 승인 흐름을 기본 조합으로 제공한다<a class="citation" href="#source-1">[1]</a><a class="citation" href="#source-4">[4]</a><a class="citation" href="#source-6">[6]</a>.</p>
+        </section>
+
+        <section id="2-핵심-구조-장기-작업을-위한-네-가지-실행-장치">
+          <h2>2. 핵심 구조: 장기 작업을 위한 네 가지 실행 장치</h2>
+          <p>앞서 본 등장 배경이 “단순 루프의 한계”라면, Deep Agents의 실제 차별점은 그 한계를 보완하는 실행 장치를 기본 제공한다는 데 있다. 특히 파일시스템, 하위 에이전트, 계획 도구, 승인·권한 제어가 핵심이다.</p>
+
+          <h3>파일시스템: 컨텍스트 창 밖의 작업 메모리</h3>
+          <p>Deep Agents는 <strong>가상 파일시스템(virtual filesystem)</strong>을 제공한다. 에이전트는 <code>ls</code>, <code>read_file</code>, <code>write_file</code>, <code>edit_file</code>, <code>delete</code>, <code>glob</code>, <code>grep</code> 같은 파일 도구를 사용해 중간 결과를 저장하고 다시 읽을 수 있다. 샌드박스 백엔드를 사용할 때는 <code>execute</code>를 통해 셸 명령 실행도 가능하다<a class="citation" href="#source-1">[1]</a><a class="citation" href="#source-5">[5]</a>.</p>
+
+          <p>이 구조의 의미는 크다. 긴 리서치나 코딩 작업에서는 모든 검색 결과, 코드 조각, 초안, 오류 로그를 대화 컨텍스트에 계속 넣을 수 없다. Deep Agents는 큰 도구 결과를 파일로 오프로드하고, 필요할 때 부분적으로 다시 읽는 방식으로 컨텍스트 압박을 줄인다<a class="citation" href="#source-1">[1]</a>. <code>read_file</code>은 offset/limit 방식의 부분 읽기를 지원하며, 공식 문서는 멀티모달 파일 처리도 언급한다<a class="citation" href="#source-1">[1]</a>.</p>
+
+          <h3>Subagents: 하위 작업을 격리된 컨텍스트로 분리</h3>
+          <p>Deep Agents에는 기본적으로 <code>task</code> 도구가 포함되며, 이를 통해 임시 하위 에이전트(ephemeral subagent)를 만들 수 있다. 하위 에이전트는 매번 새로운 컨텍스트에서 독립적으로 실행되고, 최종 결과만 상위 에이전트에 반환한다<a class="citation" href="#source-1">[1]</a>.</p>
+
+          <p>이 방식은 긴 작업의 토큰 사용량과 복잡도를 줄이는 데 유용하다. 예를 들어 경쟁사 5곳을 조사해야 할 때 상위 에이전트가 모든 검색 결과를 직접 안고 가는 대신, 하위 에이전트들이 각 회사를 조사한 뒤 요약 결과만 반환하게 할 수 있다. 공식 문서에 따르면 기본 <code>general-purpose</code> subagent가 활성화되어 있고, <code>subagents=</code> 인자로 역할별 custom subagent도 정의할 수 있다<a class="citation" href="#source-1">[1]</a><a class="citation" href="#source-4">[4]</a>.</p>
+
+          <h3>Planning/todo: 현재는 opt-in 기능</h3>
+          <p>초기 Deep Agents 논의에서 planning tool은 중요한 요소였지만, 현재 공식 문서 기준으로는 기본 기능이 아니라 <strong>opt-in</strong>이다. v0.7부터 task planning은 기본 미들웨어에서 빠졌고, <code>write_todos</code> 도구를 쓰려면 <code>TodoListMiddleware()</code>를 명시적으로 추가해야 한다<a class="citation" href="#source-1">[1]</a><a class="citation" href="#source-3">[3]</a>.</p>
+
+          <pre><code>from deepagents import create_deep_agent
+from langchain.agents.middleware import TodoListMiddleware
+
+agent = create_deep_agent(
+    model="anthropic:claude-sonnet-5",
+    middleware=[TodoListMiddleware()],
+)</code></pre>
+
+          <p>계획 도구는 복잡한 작업에서 “해야 할 일”, “진행 중인 일”, “완료된 일”을 상태로 남기게 해 준다. 단, 모든 작업에 필요한 것은 아니다. 간단한 질의응답에서는 오히려 호출 비용과 지연만 늘릴 수 있다<a class="citation" href="#source-1">[1]</a>.</p>
+
+          <h3>Human-in-the-loop과 권한 제어</h3>
+          <p>Deep Agents는 LangGraph interrupt 기반의 <strong>human-in-the-loop</strong>을 지원한다. 예를 들어 <code>interrupt_on={"edit_file": True}</code>를 설정하면 파일 편집 도구가 실행되기 전에 그래프가 멈추고, 사용자가 승인·수정·거절 같은 결정을 내릴 수 있다<a class="citation" href="#source-1">[1]</a><a class="citation" href="#source-4">[4]</a><a class="citation" href="#source-8">[8]</a>.</p>
+
+          <p>파일 권한은 <code>permissions=</code>로 제어한다. 규칙은 <code>operations</code>, <code>paths</code>, <code>mode</code>를 포함하며, <code>allow</code>, <code>deny</code>, <code>interrupt</code> 같은 모드를 사용할 수 있다<a class="citation" href="#source-1">[1]</a><a class="citation" href="#source-4">[4]</a>. 이 기능은 <code>.env</code>, credential, 고객 데이터, 운영 DB 변경 도구처럼 민감한 대상에 접근할 때 필수적이다.</p>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>구성요소</th>
+                  <th>역할</th>
+                  <th>실무적 의미</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Virtual filesystem</td>
+                  <td>중간 산출물 저장·검색·수정</td>
+                  <td>긴 리서치, 코드 수정, 보고서 초안 관리에 유리</td>
+                </tr>
+                <tr>
+                  <td>Subagents</td>
+                  <td>하위 작업을 독립 컨텍스트로 위임</td>
+                  <td>토큰 폭증 완화, 역할별 분업 가능</td>
+                </tr>
+                <tr>
+                  <td>Todo middleware</td>
+                  <td>계획과 진행 상태 관리</td>
+                  <td>복잡한 multi-step task에서 유용하나 v0.7부터 opt-in</td>
+                </tr>
+                <tr>
+                  <td>Human-in-the-loop</td>
+                  <td>위험 도구 실행 전 승인</td>
+                  <td>파일 수정, 삭제, 외부 발송, DB 변경에 필요</td>
+                </tr>
+                <tr>
+                  <td>Permissions</td>
+                  <td>파일 경로·작업별 접근 제어</td>
+                  <td>LLM이 아닌 도구 계층에서 보안 경계 설정</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="3-설치와-기본-사용법-create_deep_agent-중심-api">
+          <h2>3. 설치와 기본 사용법: <code>create_deep_agent</code> 중심 API</h2>
+          <p>Deep Agents의 사용법은 <code>create_deep_agent</code>를 중심으로 단순하게 시작한다. 공식 Quickstart는 <code>pip install deepagents</code> 또는 <code>uv add deepagents</code>를 안내하며, GitHub README도 <code>uv add deepagents</code>를 빠른 시작 설치 명령으로 제시한다<a class="citation" href="#source-3">[3]</a><a class="citation" href="#source-6">[6]</a>.</p>
+
+          <pre><code>pip install deepagents
+# 또는
+uv add deepagents</code></pre>
+
+          <p>가장 작은 형태의 예제는 도구 함수와 시스템 프롬프트를 넘겨 에이전트를 만드는 방식이다. 공식 Overview는 날씨 조회 도구를 예로 들어 <code>create_deep_agent(model=..., tools=[...], system_prompt=...)</code> 형태를 보여준다<a class="citation" href="#source-1">[1]</a>.</p>
+
+          <pre><code>from deepagents import create_deep_agent
+
+def get_weather(city: str) -&gt; str:
+    """Get weather for a given city."""
+    return f"It's always sunny in {city}!"
+
+agent = create_deep_agent(
+    model="openai:gpt-5.5",
+    tools=[get_weather],
+    system_prompt="You are a helpful assistant",
+)
+
+agent.invoke({
+    "messages": [{"role": "user", "content": "what is the weather in sf"}]
+})</code></pre>
+
+          <p>공식 문서와 README에는 <code>openai:gpt-5.5</code>, <code>openai:gpt-6-astra</code> 같은 미래형으로 보이는 모델명이 실제 예시로 등장한다<a class="citation" href="#source-1">[1]</a><a class="citation" href="#source-3">[3]</a><a class="citation" href="#source-6">[6]</a>. 다만 이는 “문서 예시에 포함되어 있다”는 뜻이지, 모든 환경에서 해당 모델명이 실제 공급자 API로 호출 가능하다는 보증은 아니다.</p>
+
+          <p>현재 공식 Customization 문서 기준 <code>create_deep_agent</code>의 주요 인자는 다음과 같다<a class="citation" href="#source-4">[4]</a>.</p>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>인자</th>
+                  <th>의미</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>model</code></td>
+                  <td>provider 문자열 또는 LangChain chat model 객체</td>
+                </tr>
+                <tr>
+                  <td><code>tools</code></td>
+                  <td>사용자 정의 함수, LangChain tool, MCP 도구 등 추가 도구</td>
+                </tr>
+                <tr>
+                  <td><code>system_prompt</code></td>
+                  <td>에이전트의 사용자 지정 시스템 지시문</td>
+                </tr>
+                <tr>
+                  <td><code>middleware</code></td>
+                  <td>Todo, guardrail, custom middleware 등 추가 미들웨어</td>
+                </tr>
+                <tr>
+                  <td><code>subagents</code></td>
+                  <td>custom subagent 정의 목록</td>
+                </tr>
+                <tr>
+                  <td><code>skills</code></td>
+                  <td>전문 워크플로와 도메인 지식을 담은 skill 소스</td>
+                </tr>
+                <tr>
+                  <td><code>memory</code></td>
+                  <td><code>AGENTS.md</code> 기반 장기 지침·프로젝트 규칙</td>
+                </tr>
+                <tr>
+                  <td><code>permissions</code></td>
+                  <td>파일 작업별 allow/deny/interrupt 규칙</td>
+                </tr>
+                <tr>
+                  <td><code>backend</code></td>
+                  <td>state, local disk, LangGraph store, sandbox 등 파일 백엔드</td>
+                </tr>
+                <tr>
+                  <td><code>interrupt_on</code></td>
+                  <td>특정 도구 호출 전 human-in-the-loop interrupt 설정</td>
+                </tr>
+                <tr>
+                  <td><code>checkpointer</code>, <code>store</code>, <code>cache</code></td>
+                  <td>LangGraph 계층의 상태 저장, 장기 저장, 캐시</td>
+                </tr>
+                <tr>
+                  <td><code>state_schema</code>, <code>context_schema</code></td>
+                  <td>상태와 런타임 컨텍스트 스키마 확장</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p>중요한 점은 현재 공식 시그니처의 인자명이 <code>instructions</code>가 아니라 <strong><code>system_prompt</code></strong>라는 것이다<a class="citation" href="#source-4">[4]</a>. 오래된 예제나 비공식 자료를 볼 때 이 차이를 확인해야 한다.</p>
+        </section>
+
+        <section id="4-적합한-활용-영역-리서치코딩업무-자동화">
+          <h2>4. 적합한 활용 영역: 리서치·코딩·업무 자동화</h2>
+          <p>Deep Agents가 모든 에이전트 문제의 정답은 아니다. 강점은 “길고 복잡하며 중간 산출물이 많은 작업”에서 두드러진다.</p>
+
+          <h3>빠르게 맞는 영역: Deep research와 문서 작성</h3>
+          <p>공식 Quickstart의 대표 예시는 <strong>research agent</strong>다. 검색 도구로 정보를 수집하고, 큰 검색 결과는 파일시스템에 저장하며, 필요하면 subagent를 생성해 조사 범위를 나눈 뒤 최종 보고서를 합성하는 흐름이다<a class="citation" href="#source-3">[3]</a>. 초기 LangChain 블로그도 <code>open_deep_research</code>를 Deep Agents 위에 만든 예시로 언급했다<a class="citation" href="#source-2">[2]</a>.</p>
+
+          <p>이 구조는 시장 조사, 기술 조사, 경쟁사 분석, 정책 문서 작성, 제품 기획 문서 작성처럼 “자료 수집 → 정리 → 초안 → 검토” 단계를 거치는 작업에 잘 맞는다. 파일시스템은 노트와 초안 저장소 역할을 하고, subagent는 개별 주제 조사를 맡으며, 상위 에이전트는 최종 종합을 담당할 수 있다<a class="citation" href="#source-1">[1]</a><a class="citation" href="#source-3">[3]</a>.</p>
+
+          <h3>강점이 분명한 영역: 코딩 에이전트</h3>
+          <p>코딩 작업은 Deep Agents와 궁합이 좋다. 코드베이스 탐색, 파일 수정, 테스트 실행, 오류 로그 분석, 수정 반복이 모두 필요하기 때문이다. GitHub README는 <strong>Deep Agents Code</strong>를 Claude Code나 Cursor와 유사한 터미널용 사전 구성 코딩 에이전트로 소개한다<a class="citation" href="#source-6">[6]</a>.</p>
+
+          <p>코딩 에이전트에서는 특히 권한과 샌드박스가 중요하다. 테스트 실행이나 빌드 명령은 <code>execute</code>가 필요하지만, 실제 운영 파일이나 비밀값에 접근해서는 안 된다. 따라서 Deep Agents의 파일 권한, sandbox backend, human-in-the-loop을 함께 설계해야 한다<a class="citation" href="#source-1">[1]</a><a class="citation" href="#source-5">[5]</a><a class="citation" href="#source-8">[8]</a>.</p>
+
+          <h3>신중히 접근할 영역: 운영 업무 자동화와 외부 시스템 변경</h3>
+          <p>고객지원 티켓 처리, CRM 업데이트, 이메일 초안 작성, 내부 지식 검색, 데이터 분석 자동화도 Deep Agents의 후보 영역이다. MCP를 통해 외부 API, 데이터베이스, SaaS 도구를 연결할 수 있고, <code>tools=</code>에 일반 함수나 MCP 서버 도구를 넘길 수 있다<a class="citation" href="#source-5">[5]</a>.</p>
+
+          <p>다만 실제 운영 시스템을 변경하는 도구는 위험도가 높다. 이메일 발송, 결제 처리, DB write, 파일 삭제 같은 작업은 자동 실행보다 <code>interrupt_on</code>이나 <code>permissions</code>의 <code>interrupt</code> 모드를 통해 승인 단계를 넣는 편이 안전하다<a class="citation" href="#source-1">[1]</a><a class="citation" href="#source-4">[4]</a><a class="citation" href="#source-8">[8]</a>.</p>
+        </section>
+
+        <section id="5-langgraph와의-관계-고수준-하네스와-저수준-런타임의-결합">
+          <h2>5. LangGraph와의 관계: 고수준 하네스와 저수준 런타임의 결합</h2>
+          <p>Deep Agents는 LangGraph와 경쟁하는 것이 아니라, LangGraph 위에서 작동하는 고수준 하네스다. 공식 Overview와 GitHub README는 Deep Agents가 LangGraph 기반의 durable execution, streaming, persistence, checkpointing을 활용한다고 설명한다<a class="citation" href="#source-1">[1]</a><a class="citation" href="#source-6">[6]</a>.</p>
+
+          <p>이 관계는 다음처럼 정리할 수 있다.</p>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>계층</th>
+                  <th>역할</th>
+                  <th>Deep Agents와의 관계</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>LangChain</td>
+                  <td>모델, 도구, 메시지, 미들웨어 구성 요소</td>
+                  <td>Deep Agents의 도구·모델·미들웨어 기반 제공</td>
+                </tr>
+                <tr>
+                  <td>LangGraph</td>
+                  <td>상태 기반 그래프 런타임, 체크포인팅, interrupt</td>
+                  <td>Deep Agents의 실행·영속성·재개 기능 담당</td>
+                </tr>
+                <tr>
+                  <td>Deep Agents</td>
+                  <td>파일시스템, subagents, memory, skills, permissions가 포함된 하네스</td>
+                  <td>장기 작업용 기본 조립 세트 제공</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p>Deep Agents의 <code>checkpointer</code>, <code>store</code>, <code>state_schema</code>, <code>context_schema</code>, <code>cache</code> 같은 인자는 LangGraph 계층과 직접 연결된다<a class="citation" href="#source-4">[4]</a>. Human-in-the-loop도 LangGraph interrupt와 persistence layer에 의존한다. interrupt가 발생하면 상태가 저장되고, 같은 thread context에서 승인 후 재개할 수 있다<a class="citation" href="#source-8">[8]</a>.</p>
+
+          <p>따라서 프로세스를 아주 세밀하게 직접 설계해야 한다면 LangGraph를 직접 쓰는 편이 낫다. 반대로 “파일시스템, 하위 에이전트, 메모리, 승인 흐름이 이미 들어간 장기 작업 에이전트”가 필요하다면 Deep Agents가 출발점으로 더 빠르다<a class="citation" href="#source-1">[1]</a><a class="citation" href="#source-6">[6]</a>.</p>
+        </section>
+
+        <section id="6-경쟁-프레임워크와-비교-deep-agents가-강한-지점">
+          <h2>6. 경쟁 프레임워크와 비교: Deep Agents가 강한 지점</h2>
+          <p>Deep Agents는 멀티에이전트 프레임워크라기보다 “장기 작업을 완수하는 단일/다중 에이전트 실행 하네스”에 가깝다. 이 관점에서 경쟁·관련 프레임워크와 차이를 봐야 한다.</p>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>프레임워크</th>
+                  <th>강점</th>
+                  <th>Deep Agents와의 차이</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>LangGraph</td>
+                  <td>그래프 단위의 세밀한 상태·흐름 제어</td>
+                  <td>Deep Agents는 LangGraph 위에 미리 조립된 고수준 하네스<a class="citation" href="#source-1">[1]</a><a class="citation" href="#source-6">[6]</a></td>
+                </tr>
+                <tr>
+                  <td>LangChain <code>create_agent</code></td>
+                  <td>가벼운 기본 에이전트 생성</td>
+                  <td>Deep Agents는 파일시스템·subagents·memory·permissions가 더 전면에 있음<a class="citation" href="#source-4">[4]</a></td>
+                </tr>
+                <tr>
+                  <td>Claude Agent SDK</td>
+                  <td>Claude Code 생태계와 긴밀한 deep agent 환경</td>
+                  <td>Deep Agents는 LangChain 모델 생태계와 LangGraph/LangSmith 통합을 중시<a class="citation" href="#source-9">[9]</a></td>
+                </tr>
+                <tr>
+                  <td>OpenAI Agents SDK</td>
+                  <td>handoff, guardrails, tracing 등 OpenAI 중심 primitive</td>
+                  <td>Deep Agents는 파일 기반 컨텍스트 관리와 하위 에이전트 격리가 강점<a class="citation" href="#source-1">[1]</a><a class="citation" href="#source-5">[5]</a></td>
+                </tr>
+                <tr>
+                  <td>CrewAI</td>
+                  <td>역할 기반 multi-agent crew 구성</td>
+                  <td>Deep Agents의 subagent는 협업 조직보다 컨텍스트 격리·하위 작업 위임에 가까움<a class="citation" href="#source-1">[1]</a><a class="citation" href="#source-4">[4]</a></td>
+                </tr>
+                <tr>
+                  <td>AutoGen 계열</td>
+                  <td>대화형 multi-agent orchestration</td>
+                  <td>Deep Agents는 권한, 파일시스템, 체크포인팅, HITL을 묶은 장기 실행 하네스 성격이 강함<a class="citation" href="#source-1">[1]</a><a class="citation" href="#source-8">[8]</a></td>
+                </tr>
+                <tr>
+                  <td>AutoGPT류</td>
+                  <td>높은 자율 실행과 반복 루프</td>
+                  <td>Deep Agents는 무제한 자율성보다 통제 가능한 도구 권한과 관측성을 중시<a class="citation" href="#source-6">[6]</a><a class="citation" href="#source-8">[8]</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p>공식 비교 문서는 Deep Agents가 OpenSWE와 LangSmith Fleet 같은 프로덕션 시스템에 쓰였다고 밝히며, Claude Agent SDK와 비교해 모델·배포·운영 선택지가 더 넓다는 점을 강조한다<a class="citation" href="#source-9">[9]</a>. 다만 공개 문서상 특정 벤치마크 성공률이나 ROI 수치는 제한적이므로, 실제 도입 시에는 조직의 작업 유형별로 자체 평가를 설계해야 한다.</p>
+        </section>
+
+        <section id="7-도입-시-주의점-권한비용평가-체계를-먼저-설계해야-한다">
+          <h2>7. 도입 시 주의점: 권한·비용·평가 체계를 먼저 설계해야 한다</h2>
+          <p>Deep Agents의 장점은 곧 리스크이기도 하다. 파일을 읽고 쓰고, 셸을 실행하고, 외부 API를 호출하고, 하위 에이전트를 만들 수 있다는 것은 강력하지만, 잘못 구성하면 비용·보안·품질 문제가 빠르게 커진다.</p>
+
+          <p>첫째, <strong>도구 권한이 곧 보안 경계</strong>다. GitHub README는 Deep Agents가 기본적으로 LLM을 신뢰하는 실행 모델을 따른다고 설명한다. 즉 에이전트는 도구가 허용한 일을 할 수 있으므로, 안전성은 모델의 선의가 아니라 도구 allowlist, 파일 권한, 샌드박스, 승인 정책에서 확보해야 한다<a class="citation" href="#source-6">[6]</a>.</p>
+
+          <p>둘째, <strong>프롬프트 인젝션 위험</strong>이 크다. Research agent나 코딩 에이전트는 웹 페이지, 문서, README, 이슈, 이메일처럼 신뢰할 수 없는 입력을 읽는다. 외부 문서 안의 악성 지시가 도구 호출로 이어질 수 있으므로, 민감 도구는 read-only로 시작하고, write·delete·send·execute 계열 작업에는 interrupt를 적용하는 것이 바람직하다<a class="citation" href="#source-1">[1]</a><a class="citation" href="#source-5">[5]</a><a class="citation" href="#source-8">[8]</a>.</p>
+
+          <p>셋째, <strong>비용과 지연이 늘 수 있다</strong>. Deep Agents는 subagent 호출, 파일 읽기·쓰기, 검색, 요약, human approval 등 여러 단계를 포함할 수 있다. 단순 <code>create_agent</code>보다 더 많은 모델 호출과 도구 호출이 발생할 가능성이 높다<a class="citation" href="#source-1">[1]</a><a class="citation" href="#source-3">[3]</a>. 긴 리서치 작업에서는 검색 API 비용과 토큰 비용도 함께 관리해야 한다.</p>
+
+          <p>넷째, <strong>관측성과 평가가 없으면 운영하기 어렵다</strong>. 장기 에이전트는 실패 원인이 모델 판단, 도구 오류, 권한 설정, 파일 상태, 하위 에이전트 결과 중 어디에 있는지 파악하기 어렵다. 공식 문서와 README는 LangSmith를 통한 trace, debug, evaluation, monitoring을 권장한다<a class="citation" href="#source-1">[1]</a><a class="citation" href="#source-6">[6]</a>.</p>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>리스크</th>
+                  <th>발생 상황</th>
+                  <th>권장 대응</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>민감 파일 노출</td>
+                  <td><code>.env</code>, credential, 고객 데이터 접근</td>
+                  <td><code>permissions</code>로 deny/interrupt 규칙 설정</td>
+                </tr>
+                <tr>
+                  <td>파괴적 변경</td>
+                  <td>파일 삭제, 코드 대량 수정, DB write</td>
+                  <td><code>interrupt_on</code>, human approval, sandbox 적용</td>
+                </tr>
+                <tr>
+                  <td>프롬프트 인젝션</td>
+                  <td>웹·문서·이메일을 읽는 에이전트</td>
+                  <td>도구 allowlist, read-only 기본값, 출력 검증</td>
+                </tr>
+                <tr>
+                  <td>비용 폭증</td>
+                  <td>subagent·검색·요약 반복</td>
+                  <td>호출 한도, 작업별 budget, observability 설정</td>
+                </tr>
+                <tr>
+                  <td>디버깅 난이도</td>
+                  <td>긴 실행 중 실패</td>
+                  <td>LangSmith trace, checkpoint, 테스트셋 평가</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="8-최신-상태와-실무적-결론">
+          <h2>8. 최신 상태와 실무적 결론</h2>
+          <p>Deep Agents는 2025년 7월 30일 LangChain 블로그에서 본격 소개된 뒤 SDK와 공식 문서가 빠르게 확장됐다<a class="citation" href="#source-2">[2]</a>. 현재 공식 문서는 <code>/oss/python/deepagents/...</code> 경로에서 Quickstart, Overview, Customization, Tools 등을 제공하며, SDK 자체는 아직 1.0이 아닌 <strong>0.x 계열</strong>이다<a class="citation" href="#source-1">[1]</a><a class="citation" href="#source-3">[3]</a><a class="citation" href="#source-4">[4]</a><a class="citation" href="#source-5">[5]</a>. GitHub Releases 기준 최신 SDK 릴리스는 <strong><code>deepagents==0.7.23</code></strong>이고, 2026년 10월 7일 릴리스로 표시된다<a class="citation" href="#source-7">[7]</a>.</p>
+
+          <div class="stats" aria-label="최신 상태 요약">
+            <div class="stat-card">
+              <span class="label">블로그 소개일</span>
+              <span class="value">2025.07.30</span>
+            </div>
+            <div class="stat-card">
+              <span class="label">SDK 계열</span>
+              <span class="value">0.x</span>
+            </div>
+            <div class="stat-card">
+              <span class="label">최신 릴리스</span>
+              <span class="value">0.7.23</span>
+            </div>
+            <div class="stat-card">
+              <span class="label">릴리스 표시일</span>
+              <span class="value">2026.10.07</span>
+            </div>
+          </div>
+
+          <p>실무적으로는 다음 기준으로 판단하는 것이 좋다.</p>
+
+          <ul>
+            <li>단순 챗봇, 짧은 Q&amp;A, 한두 번의 API 호출이면 Deep Agents는 과할 수 있다.</li>
+            <li>파일 기반 작업공간, 여러 단계의 계획, 하위 작업 위임, 중간 산출물 관리가 필요하면 Deep Agents가 적합하다.</li>
+            <li>코드 수정, 장기 리서치, 문서 생성, 데이터 분석, 내부 업무 자동화처럼 “완성물”이 필요한 작업에서 특히 유리하다.</li>
+            <li>운영 환경에서는 처음부터 <code>permissions</code>, <code>interrupt_on</code>, sandbox, checkpointer, LangSmith 관측성을 함께 설계해야 한다.</li>
+          </ul>
+
+          <div class="callout">
+            <p>결론적으로 Deep Agents는 “더 똑똑한 단일 프롬프트”가 아니라, <strong>장기 작업을 끝까지 밀고 가기 위한 실행 환경</strong>이다. 성공적인 도입의 핵심은 모델 선택보다 작업공간, 권한, 하위 작업 분리, 평가 체계를 어떻게 설계하느냐에 있다. Deep Agents는 이 구조를 LangChain/LangGraph 생태계 안에서 빠르게 시작하게 해 주지만, 운영 안정성은 여전히 사용자가 정의한 도구 경계와 승인 흐름에 달려 있다.</p>
+          </div>
+        </section>
+
+        <section class="sources" id="sources">
+          <h2>출처</h2>
+          <ol>
+            <li id="source-1">[1] LangChain Docs — Deep Agents overview: <a href="https://docs.langchain.com/oss/python/deepagents/overview">https://docs.langchain.com/oss/python/deepagents/overview</a></li>
+            <li id="source-2">[2] LangChain Blog — Deep Agents: <a href="https://www.langchain.com/blog/deep-agents">https://www.langchain.com/blog/deep-agents</a></li>
+            <li id="source-3">[3] LangChain Docs — Deep Agents quickstart: <a href="https://docs.langchain.com/oss/python/deepagents/quickstart">https://docs.langchain.com/oss/python/deepagents/quickstart</a></li>
+            <li id="source-4">[4] LangChain Docs — Deep Agents customization: <a href="https://docs.langchain.com/oss/python/deepagents/customization">https://docs.langchain.com/oss/python/deepagents/customization</a></li>
+            <li id="source-5">[5] LangChain Docs — Deep Agents tools: <a href="https://docs.langchain.com/oss/python/deepagents/tools">https://docs.langchain.com/oss/python/deepagents/tools</a></li>
+            <li id="source-6">[6] GitHub — langchain-ai/deepagents: <a href="https://github.com/langchain-ai/deepagents">https://github.com/langchain-ai/deepagents</a></li>
+            <li id="source-7">[7] GitHub — langchain-ai/deepagents releases: <a href="https://github.com/langchain-ai/deepagents/releases">https://github.com/langchain-ai/deepagents/releases</a></li>
+            <li id="source-8">[8] LangChain Docs — Human-in-the-loop middleware: <a href="https://docs.langchain.com/oss/python/langchain/human-in-the-loop">https://docs.langchain.com/oss/python/langchain/human-in-the-loop</a></li>
+            <li id="source-9">[9] LangChain Docs — Deep Agents comparison: <a href="https://docs.langchain.com/oss/python/deepagents/comparison">https://docs.langchain.com/oss/python/deepagents/comparison</a></li>
+          </ol>
+        </section>
+      </main>
+    </article>
+  </div>
+
+  <script>
+    const overviewCtx = document.getElementById('overviewChart');
+
+    new Chart(overviewCtx, {
+      type: 'bar',
+      data: {
+        labels: [
+          '핵심 실행 구성요소',
+          'create_deep_agent 주요 인자',
+          'LangChain/LangGraph/Deep Agents 계층',
+          '경쟁·관련 프레임워크',
+          '도입 리스크'
+        ],
+        datasets: [{
+          label: '보고서에 정리된 항목 수',
+          data: [5, 13, 3, 7, 5],
+          backgroundColor: [
+            'rgba(37, 99, 235, 0.78)',
+            'rgba(16, 185, 129, 0.78)',
+            'rgba(245, 158, 11, 0.78)',
+            'rgba(99, 102, 241, 0.78)',
+            'rgba(239, 68, 68, 0.78)'
+          ],
+          borderColor: [
+            'rgba(37, 99, 235, 1)',
+            'rgba(16, 185, 129, 1)',
+            'rgba(245, 158, 11, 1)',
+            'rgba(99, 102, 241, 1)',
+            'rgba(239, 68, 68, 1)'
+          ],
+          borderWidth: 1,
+          borderRadius: 8
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            display: true,
+            labels: {
+              font: {
+                family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif'
+              }
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return context.dataset.label + ': ' + context.parsed.y + '개';
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            ticks: {
+              font: {
+                family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif'
+              }
+            },
+            grid: {
+              display: false
+            }
+          },
+          y: {
+            beginAtZero: true,
+            ticks: {
+              stepSize: 1,
+              callback: function(value) {
+                return value + '개';
+              },
+              font: {
+                family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif'
+              }
+            }
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>
