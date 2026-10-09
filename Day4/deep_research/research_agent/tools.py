@@ -1,3 +1,5 @@
+import concurrent.futures
+
 import httpx
 from langchain_core.tools import InjectedToolArg, tool
 from markdownify import markdownify # type: ignore
@@ -6,8 +8,14 @@ from typing_extensions import Annotated, Literal
 
 tavily_client = TavilyClient()
 
+# 페이지 1건을 가져오는 데 허용하는 최대 시간(초). 느린 사이트 하나 때문에
+# 전체 검색이 지연되는 것을 막기 위해 기존 10초보다 짧게 설정합니다.
+DEFAULT_FETCH_TIMEOUT = 6.0
+# 한 번의 tavily_search 호출에서 동시에 가져올 웹페이지 수 (병렬 fetch).
+MAX_FETCH_WORKERS = 5
 
-def fetch_webpage_content(url: str, timeout: float = 10.0) -> str:
+
+def fetch_webpage_content(url: str, timeout: float = DEFAULT_FETCH_TIMEOUT) -> str:
     """웹페이지 콘텐츠를 가져와서 마크다운으로 변환합니다.
 
     Args:
@@ -58,6 +66,7 @@ def tavily_search(
     """주어진 쿼리에 대한 웹 정보를 검색합니다.
 
     Tavily를 사용하여 관련 URL을 찾은 다음, 전체 웹페이지 콘텐츠를 마크다운으로 가져와 반환합니다.
+    여러 URL의 콘텐츠는 순차가 아니라 병렬(스레드풀)로 가져와 전체 호출 시간을 단축합니다.
 
     Args:
         query: 실행할 검색 쿼리
@@ -74,14 +83,18 @@ def tavily_search(
         topic=topic,
     )
 
-    # 각 URL의 전체 콘텐츠 가져오기
+    results = search_results.get("results", [])
+
+    # 각 URL의 전체 콘텐츠를 병렬로 가져오기 (순차 실행 대비 지연시간 대폭 단축)
+    with concurrent.futures.ThreadPoolExecutor(
+        max_workers=min(MAX_FETCH_WORKERS, len(results)) or 1
+    ) as executor:
+        contents = list(executor.map(fetch_webpage_content, [r["url"] for r in results]))
+
     result_texts = []
-    for result in search_results.get("results", []):
+    for result, content in zip(results, contents):
         url = result["url"]
         title = result["title"]
-
-        # 웹페이지 콘텐츠 가져오기
-        content = fetch_webpage_content(url)
 
         result_text = f"""## {title}
 **URL:** {url}
@@ -98,4 +111,5 @@ def tavily_search(
 {chr(10).join(result_texts)}"""
 
     return response
+
 
