@@ -2,9 +2,9 @@
 
 Python version: 3.13.5
 
-강의 자료(PDF): [https://drive.google.com/file/d/1yFJrOTEt2CJkWjWVKKUVNFK186kaFdlM/view?usp=sharing](https://drive.google.com/file/d/1yFJrOTEt2CJkWjWVKKUVNFK186kaFdlM/view?usp=sharing)
+강의 자료(PDF): [https://drive.google.com/file/d/1qM3iW_G94EHWkwgbq7mXEEtjGMT9feHR/view?usp=sharing](https://drive.google.com/file/d/1qM3iW_G94EHWkwgbq7mXEEtjGMT9feHR/view?usp=sharing)
 
-API: [https://drive.google.com/file/d/1kelG7Nf-6Tp4S6g8aYqFMIFZU-oFFNwR/view?usp=sharing](https://drive.google.com/file/d/1kelG7Nf-6Tp4S6g8aYqFMIFZU-oFFNwR/view?usp=sharing)
+API: [https://drive.google.com/file/d/14RTrYgW-e-8w6HaNRTdC9_njuN6M3kS_/view?usp=sharing](https://drive.google.com/file/d/14RTrYgW-e-8w6HaNRTdC9_njuN6M3kS_/view?usp=sharing)
 
 ```
 📦sk-rag-aiagent
