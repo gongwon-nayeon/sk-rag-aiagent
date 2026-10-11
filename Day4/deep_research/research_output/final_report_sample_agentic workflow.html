@@ -1,0 +1,1455 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>에이전틱 워크플로의 도메인별 적용 사례 보고서</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --paper: #ffffff;
+      --ink: #1f2937;
+      --muted: #667085;
+      --line: #e5e7eb;
+      --primary: #2454d6;
+      --primary-dark: #183b9f;
+      --accent: #0f766e;
+      --warning: #b45309;
+      --danger: #b91c1c;
+      --soft-blue: #eef4ff;
+      --soft-green: #ecfdf3;
+      --soft-amber: #fffbeb;
+      --soft-red: #fef2f2;
+      --shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", Roboto, Arial, sans-serif;
+      line-height: 1.72;
+      word-break: keep-all;
+    }
+
+    a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .page {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 36px 20px 72px;
+    }
+
+    header.hero {
+      background:
+        radial-gradient(circle at top left, rgba(36, 84, 214, 0.18), transparent 32%),
+        linear-gradient(135deg, #ffffff 0%, #eef4ff 100%);
+      border: 1px solid rgba(36, 84, 214, 0.12);
+      border-radius: 28px;
+      padding: 44px 42px;
+      box-shadow: var(--shadow);
+      margin-bottom: 28px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(36, 84, 214, 0.09);
+      color: var(--primary-dark);
+      font-size: 0.88rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0 0 16px;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      line-height: 1.18;
+      letter-spacing: -0.04em;
+      color: #111827;
+    }
+
+    .subtitle {
+      max-width: 880px;
+      margin: 0;
+      color: #475467;
+      font-size: 1.13rem;
+    }
+
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    .chip {
+      display: inline-flex;
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: #fff;
+      border: 1px solid #dbe4ff;
+      color: #344054;
+      font-size: 0.88rem;
+      font-weight: 600;
+    }
+
+    nav.toc {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 26px 28px;
+      box-shadow: var(--shadow);
+      margin-bottom: 28px;
+    }
+
+    nav.toc h2 {
+      margin: 0 0 14px;
+      padding: 0;
+      border: 0;
+      font-size: 1.25rem;
+    }
+
+    nav.toc ol {
+      margin: 0;
+      padding-left: 22px;
+    }
+
+    nav.toc li {
+      margin: 8px 0;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    main {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      padding: 34px 42px 46px;
+    }
+
+    section {
+      margin: 0 0 50px;
+      padding-bottom: 36px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    section:last-child {
+      border-bottom: 0;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    h2 {
+      margin: 0 0 18px;
+      padding-top: 8px;
+      color: #111827;
+      font-size: clamp(1.55rem, 3vw, 2.15rem);
+      line-height: 1.28;
+      letter-spacing: -0.03em;
+    }
+
+    h3 {
+      margin: 30px 0 12px;
+      color: #182230;
+      font-size: 1.23rem;
+      line-height: 1.35;
+      letter-spacing: -0.015em;
+    }
+
+    p {
+      margin: 0 0 16px;
+    }
+
+    strong {
+      color: #111827;
+      font-weight: 800;
+    }
+
+    .summary {
+      background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+      border: 1px solid #dbe4ff;
+      border-radius: var(--radius);
+      padding: 28px;
+      margin-bottom: 46px;
+    }
+
+    .summary h2 {
+      padding: 0;
+      margin-bottom: 16px;
+      font-size: 1.7rem;
+    }
+
+    .key-findings {
+      margin: 22px 0 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 12px;
+    }
+
+    .key-findings li {
+      position: relative;
+      padding: 14px 16px 14px 44px;
+      background: #ffffff;
+      border: 1px solid #e4e9ff;
+      border-radius: 14px;
+    }
+
+    .key-findings li::before {
+      content: "✓";
+      position: absolute;
+      left: 16px;
+      top: 14px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #fff;
+      font-size: 0.8rem;
+      line-height: 20px;
+      text-align: center;
+      font-weight: 800;
+    }
+
+    .callout {
+      margin: 20px 0;
+      padding: 18px 20px;
+      border-radius: 16px;
+      border: 1px solid #dbe4ff;
+      background: var(--soft-blue);
+      color: #243b69;
+    }
+
+    .callout.warning {
+      border-color: #fde68a;
+      background: var(--soft-amber);
+      color: #713f12;
+    }
+
+    .grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .grid.two {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin: 22px 0 6px;
+    }
+
+    .stat-card {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px;
+      background: #fff;
+    }
+
+    .stat-card .value {
+      display: block;
+      color: var(--primary-dark);
+      font-size: 1.7rem;
+      line-height: 1.15;
+      font-weight: 850;
+      letter-spacing: -0.03em;
+    }
+
+    .stat-card .label {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.45;
+    }
+
+    .chart-card {
+      margin: 24px 0;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 22px;
+      background: #fff;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
+    }
+
+    .chart-card h3 {
+      margin-top: 0;
+    }
+
+    .chart-wrap {
+      position: relative;
+      height: 320px;
+      width: 100%;
+    }
+
+    .chart-note {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      margin: 24px 0;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #fff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 760px;
+      font-size: 0.95rem;
+    }
+
+    th, td {
+      padding: 14px 16px;
+      vertical-align: top;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+    }
+
+    th {
+      background: #f8fafc;
+      color: #344054;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    td:first-child {
+      font-weight: 750;
+      color: #182230;
+    }
+
+    .risk-low {
+      color: #027a48;
+      font-weight: 700;
+    }
+
+    .risk-mid {
+      color: #b45309;
+      font-weight: 700;
+    }
+
+    .risk-high {
+      color: #b91c1c;
+      font-weight: 700;
+    }
+
+    .sources {
+      background: #101828;
+      color: #e5e7eb;
+      border-radius: 28px;
+      padding: 32px 36px;
+      margin-top: 28px;
+      box-shadow: var(--shadow);
+    }
+
+    .sources h2 {
+      color: #fff;
+      padding: 0;
+      margin-bottom: 14px;
+    }
+
+    .sources ol {
+      margin: 0;
+      padding-left: 22px;
+    }
+
+    .sources li {
+      margin: 12px 0;
+      padding-left: 4px;
+      color: #d0d5dd;
+      word-break: break-word;
+    }
+
+    .sources a {
+      color: #9cc2ff;
+    }
+
+    sup, .cite {
+      color: var(--primary);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 860px) {
+      .page {
+        padding: 20px 14px 48px;
+      }
+
+      header.hero,
+      main,
+      .sources {
+        padding: 26px 20px;
+        border-radius: 20px;
+      }
+
+      nav.toc {
+        padding: 22px 20px;
+      }
+
+      .grid.two,
+      .stat-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .chart-wrap {
+        height: 280px;
+      }
+
+      body {
+        word-break: normal;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="hero">
+      <div class="eyebrow">Research Report</div>
+      <h1>에이전틱 워크플로의 도메인별 적용 사례</h1>
+      <p class="subtitle">
+        생성형 AI가 목표 이해, 계획 수립, 도구 호출, 실행 결과 점검을 통해 업무를 완결하는 방식이
+        고객지원, 개발, 법무, 금융, 헬스케어, 보안, 제조·물류 영역에서 어떻게 적용되는지 정리한 보고서입니다.
+      </p>
+      <div class="meta-row">
+        <span class="chip">고빈도·저위험 업무의 빠른 ROI</span>
+        <span class="chip">전문가 생산성 향상</span>
+        <span class="chip">고위험 도메인의 승인·감사 체계</span>
+        <span class="chip">물리 운영과 실행 통제</span>
+      </div>
+    </header>
+
+    <nav class="toc" aria-label="목차">
+      <h2>목차</h2>
+      <ol>
+        <li><a href="#1-에이전틱-워크플로의-의미와-기존-자동화와의-차이">에이전틱 워크플로의 의미와 기존 자동화와의 차이</a></li>
+        <li><a href="#2-빠른-roi-영역-고객지원ithr-서비스데스크영업-운영">빠른 ROI 영역: 고객지원·IT/HR 서비스데스크·영업 운영</a></li>
+        <li><a href="#3-전문가-생산성-영역-소프트웨어-개발법무데이터-분석">전문가 생산성 영역: 소프트웨어 개발·법무·데이터 분석</a></li>
+        <li><a href="#4-고위험-의사결정-영역-금융헬스케어사이버보안">고위험 의사결정 영역: 금융·헬스케어·사이버보안</a></li>
+        <li><a href="#5-물리-세계와-운영-최적화-영역-제조공급망물류">물리 세계와 운영 최적화 영역: 제조·공급망·물류</a></li>
+        <li><a href="#6-도입-원칙과-우선순위-자동화율보다-안전한-완결률">도입 원칙과 우선순위: 자동화율보다 안전한 완결률</a></li>
+      </ol>
+    </nav>
+
+    <main>
+      <section class="summary" id="executive-summary">
+        <h2>Executive Summary</h2>
+        <p>
+          에이전틱 워크플로는 생성형 AI가 단순히 답변을 만드는 수준을 넘어,
+          <strong>목표를 이해하고 계획을 세운 뒤 여러 도구와 업무 시스템을 호출해 작업을 완결하는 방식</strong>이다.
+          고객지원에서는 주문·환불 상태를 조회하고 조치를 실행하며, 개발에서는 이슈를 분석해 코드와 테스트를 생성하고,
+          보안에서는 경보를 분류해 대응 플레이북을 제안한다. 따라서 핵심 질문은 “어느 도메인에 AI 에이전트를 적용할 수 있는가”가 아니라,
+          <strong>어떤 업무는 빠르게 자동화하고 어떤 업무는 인간 승인과 강한 통제를 붙여야 하는가</strong>이다.
+        </p>
+        <p>
+          이 보고서는 먼저 에이전틱 워크플로의 개념을 기존 챗봇·RPA와 구분한다. 이어 적용 사례를 단순히 산업별로 나열하지 않고,
+          성과가 빠르게 나는 영역, 전문가 생산성을 높이는 영역, 규제와 책임 때문에 신중해야 하는 영역,
+          물리적 운영과 연결되는 영역으로 묶어 정리한다. 마지막으로 실제 도입 시 어떤 순서로 자동화 수준을 높여야 하는지 제안한다.
+        </p>
+
+        <h3>Key Findings</h3>
+        <ul class="key-findings">
+          <li>
+            <strong>가장 빠른 ROI는 고빈도·저위험·반복 업무에서 나온다.</strong>
+            Klarna의 AI assistant는 출시 첫 달 230만 건의 고객 대화를 처리했고, 전체 고객서비스 채팅의 3분의 2를 담당했으며,
+            평균 해결 시간을 11분에서 2분 미만으로 줄였다고 발표했다<span class="cite">[1]</span>.
+          </li>
+          <li>
+            <strong>완전 자동화보다 하이브리드 운영이 현실적이다.</strong>
+            Klarna는 이후 일부 인간 상담 역할을 보강한 것으로 보도됐는데, 이는 복잡하거나 민감한 문의에는 사람이 개입해야 한다는 점을 보여준다<span class="cite">[2]</span>.
+          </li>
+          <li>
+            <strong>전문가 업무에서는 ‘대체’보다 ‘처리 속도와 초안 품질 향상’이 핵심 가치다.</strong>
+            GitHub Copilot 연구에서 개발자는 동일 과제를 55% 더 빠르게 완료했고, 88%가 생산성 향상을 체감했다고 답했다<span class="cite">[3]</span>.
+          </li>
+          <li>
+            <strong>보안·금융·헬스케어·법무는 에이전트 효과가 크지만 통제 수준도 높아야 한다.</strong>
+            Microsoft Security Copilot 실험에서는 보안 작업 속도가 22% 빨라지고 정확도가 7% 높아졌지만,
+            자동 격리·계정 차단 같은 조치는 업무 중단을 초래할 수 있어 승인 절차가 필요하다<span class="cite">[4]</span>.
+          </li>
+          <li>
+            <strong>기업용 AI 에이전트는 단일 챗봇이 아니라 CRM·ITSM·HRIS·ERP 위에서 움직이는 실행형 플랫폼으로 진화하고 있다.</strong>
+            Salesforce는 Agentforce 고객이 8,000개 이상이라고 발표했고, ServiceNow는 ITSM·HR·고객서비스용 AI 에이전트와 운영 거버넌스 기능을 제품화했다<span class="cite">[5][6]</span>.
+          </li>
+        </ul>
+
+        <div class="stat-grid" aria-label="핵심 수치 요약">
+          <div class="stat-card">
+            <span class="value">230만</span>
+            <span class="label">Klarna AI assistant의 출시 첫 달 고객 대화 처리 건수</span>
+          </div>
+          <div class="stat-card">
+            <span class="value">55%</span>
+            <span class="label">GitHub Copilot 사용자의 동일 코딩 과제 완료 속도 향상</span>
+          </div>
+          <div class="stat-card">
+            <span class="value">22%</span>
+            <span class="label">Microsoft Security Copilot 실험의 보안 작업 속도 향상</span>
+          </div>
+          <div class="stat-card">
+            <span class="value">8,000+</span>
+            <span class="label">Salesforce Agentforce 고객 수 발표치</span>
+          </div>
+        </div>
+      </section>
+
+      <section id="1-에이전틱-워크플로의-의미와-기존-자동화와의-차이">
+        <h2>1. 에이전틱 워크플로의 의미와 기존 자동화와의 차이</h2>
+        <p>
+          도메인별 사례를 이해하려면 먼저 에이전틱 워크플로가 무엇을 새롭게 만드는지 구분해야 한다.
+          <strong>에이전틱 워크플로(agentic workflow)</strong>는 AI가 사용자의 목표를 받아 업무를 여러 단계로 나누고,
+          필요한 도구·API·데이터베이스·업무 애플리케이션을 호출하며, 실행 결과를 점검하고 필요하면 재시도하거나 사람에게 넘기는 구조다.
+          사이버보안 분야 조사 논문도 에이전틱 AI를 장기 작업에 걸쳐 추론, 계획, 행동, 적응을 수행하는 시스템으로 설명한다<span class="cite">[7]</span>.
+        </p>
+        <p>
+          기존 챗봇과의 차이는 “대화”가 아니라 “업무 완결”에 있다. FAQ 챗봇은 환불 정책 링크를 안내하지만,
+          에이전트는 주문 내역 조회, 결제 상태 확인, 반품 조건 검토, 환불 요청 생성, 고객 안내까지 수행할 수 있다.
+          RPA와도 다르다. RPA는 정해진 화면과 규칙을 반복하는 데 강하지만 예외 상황과 비정형 문서에 약하다.
+          에이전틱 워크플로는 목표를 기준으로 계획을 수정하고 여러 시스템을 넘나들 수 있다는 점에서 더 유연하다<span class="cite">[7]</span>.
+        </p>
+        <p>
+          다만 이 유연성이 곧 완전 자율화를 뜻하지는 않는다. 실제 성과가 빠른 업무는 대체로 범위가 좁고,
+          입력 데이터가 비교적 구조화되어 있으며, 실패해도 되돌릴 수 있고, 사람에게 이관할 수 있는 업무다.
+          반대로 금융 승인, 의료 판단, 법률 의견, 보안 차단, 설비 제어처럼 오류 비용이 큰 영역은 권한 통제,
+          감사 로그, 근거 제시, 인간 승인 단계가 필요하다<span class="cite">[4][7]</span>.
+        </p>
+
+        <div class="callout">
+          <strong>핵심 구분:</strong> 에이전틱 워크플로는 단순 응답 생성이 아니라 목표 기반의 업무 완결을 지향하지만,
+          업무 위험도에 따라 사람 이관, 승인, 감사, 권한 제한이 함께 설계되어야 한다.
+        </div>
+      </section>
+
+      <section id="2-빠른-roi-영역-고객지원ithr-서비스데스크영업-운영">
+        <h2>2. 빠른 ROI 영역: 고객지원·IT/HR 서비스데스크·영업 운영</h2>
+        <p>
+          개념적으로 에이전틱 워크플로가 “목표 기반 실행”이라면, 가장 먼저 성과가 확인되는 곳은 반복량이 많고 실패 비용이 낮은 운영 업무다.
+          고객지원, IT·HR 서비스데스크, 영업 운영은 공통적으로 문의·요청의 양이 많고, 처리 절차가 비교적 표준화되어 있으며,
+          평균 처리 시간과 자동 해결률 같은 지표를 바로 측정할 수 있다.
+        </p>
+
+        <h3>고객지원·컨택센터</h3>
+        <p>
+          <strong>고객지원·컨택센터</strong>는 대표적인 선도 영역이다. 전형적인 흐름은 “고객 문의 → 인증 및 계정 확인 → 주문·결제·배송·정책 조회 →
+          환불·예약 변경·계정 수정 같은 조치 실행 → 불확실하거나 고위험이면 상담원 이관”이다.
+          Klarna는 OpenAI 기반 AI assistant가 출시 첫 달 230만 건의 대화를 처리했고,
+          이는 전체 고객서비스 채팅의 3분의 2에 해당한다고 밝혔다. 회사는 이를 정규직 상담원 700명 상당의 업무량으로 환산했으며,
+          평균 해결 시간은 11분에서 2분 미만으로 줄었다고 발표했다<span class="cite">[1]</span>.
+        </p>
+        <p>
+          그러나 이 사례는 “상담원을 모두 대체할 수 있다”는 결론이 아니라,
+          <strong>문의 유형을 나눠야 한다</strong>는 결론에 가깝다. Reuters는 Klarna가 AI 중심 고객지원 이후 일부 인간 상담 역할을 다시 보강한다고 보도했다<span class="cite">[2]</span>.
+          단순 주문 조회와 환불 상태 확인은 에이전트에 적합하지만, 고액 분쟁, 취약 고객, 사기 의심, 규제 민원은 빠르게 사람에게 넘기는 편이 안전하다.
+        </p>
+
+        <div class="chart-card">
+          <h3>Klarna 고객지원 AI assistant의 발표 성과</h3>
+          <div class="chart-wrap">
+            <canvas id="klarnaChart" aria-label="Klarna AI assistant의 처리 비중과 해결 시간 감소 차트"></canvas>
+          </div>
+          <p class="chart-note">
+            기준: 출시 첫 달 230만 건 대화 처리, 전체 고객서비스 채팅의 3분의 2 담당, 평균 해결 시간 11분에서 2분 미만으로 단축 발표<span class="cite">[1]</span>.
+          </p>
+        </div>
+
+        <h3>IT·HR 서비스데스크</h3>
+        <p>
+          <strong>IT·HR 서비스데스크</strong>도 빠른 ROI가 가능한 영역이다. 비밀번호 재설정, 소프트웨어 설치 요청, 접근권한 신청,
+          휴가·급여·복지 문의는 빈도가 높고 절차가 정형화되어 있다. ServiceNow는 ITSM, HR, 고객서비스 영역에서 사전 구축 AI 에이전트를 제공하며,
+          AI Agent Orchestrator, AI Agent Studio, AI Control Tower로 멀티 에이전트 운영과 거버넌스를 강조한다<span class="cite">[6]</span>.
+          Moveworks도 IT·HR·재무·시설 등 직원 지원 자동화 고객사례를 공개하고 있으며, 티켓 자동 해결률과 응답시간 단축을 핵심 지표로 제시한다<span class="cite">[8]</span>.
+        </p>
+
+        <h3>영업·마케팅·CRM</h3>
+        <p>
+          <strong>영업·마케팅·CRM</strong>에서는 에이전트가 리드 조사, 계정 정보 업데이트, 개인화 이메일 초안, 미팅 요약, 후속 액션 등록을 맡는다.
+          영업 담당자가 수동 잠재고객 발굴에 40~50%의 시간을 쓰는 경우가 많다는 점을 고려하면, 이 영역은 자동화의 기회가 크다<span class="cite">[9]</span>.
+          Salesforce는 Agentforce 고객이 8,000개 이상이며, AI와 Data Cloud 관련 매출이 출시 후 6개월 내 9억 달러 규모에 이르렀다고 발표했다<span class="cite">[5]</span>.
+          다만 가격 협상, 계약 조건 제안, 규제 대상 산업의 마케팅 문구는 법무·컴플라이언스 검토를 거쳐야 한다.
+        </p>
+
+        <div class="chart-card">
+          <h3>빠른 ROI 영역의 대표 정량 지표</h3>
+          <div class="chart-wrap">
+            <canvas id="roiOpsChart" aria-label="빠른 ROI 영역의 대표 정량 지표 차트"></canvas>
+          </div>
+          <p class="chart-note">
+            비교 목적상 서로 다른 단위의 지표를 나란히 배치했다. 영업 담당자의 수동 잠재고객 발굴 시간은 40~50% 범위의 중간값 45%로 표시했다<span class="cite">[5][9]</span>.
+          </p>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>도메인</th>
+                <th>대표 워크플로</th>
+                <th>적용하기 쉬운 업무</th>
+                <th>주의가 필요한 업무</th>
+                <th>주요 근거</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>고객지원</td>
+                <td>문의 → 고객·주문 조회 → 조치 실행 → 이관</td>
+                <td>FAQ, 주문·배송·환불 상태, 예약 변경</td>
+                <td>분쟁, 고액 보상, 취약 고객, 규제 민원</td>
+                <td>Klarna 첫 달 230만 대화, 해결 시간 11분→2분 미만<span class="cite">[1]</span></td>
+              </tr>
+              <tr>
+                <td>IT 서비스데스크</td>
+                <td>티켓 → 진단 → 시스템 조회 → 조치 또는 승인 요청</td>
+                <td>비밀번호, 앱 설치, 접근권한 신청, 지식검색</td>
+                <td>관리자 권한, 보안 예외, 대규모 설정 변경</td>
+                <td>ServiceNow AI Agents 제품화<span class="cite">[6]</span></td>
+              </tr>
+              <tr>
+                <td>HR 직원지원</td>
+                <td>직원 질문 → 정책 검색 → HRIS 확인 → 요청 생성</td>
+                <td>휴가·복지·급여 FAQ, 온보딩 체크리스트</td>
+                <td>채용 합격, 징계, 해고, 성과평가</td>
+                <td>Moveworks 직원지원 사례군<span class="cite">[8]</span></td>
+              </tr>
+              <tr>
+                <td>영업·CRM</td>
+                <td>리드 → 계정 조사 → 메시지 생성 → CRM 업데이트</td>
+                <td>리드 리서치, 이메일 초안, 미팅 요약</td>
+                <td>가격 협상, 계약 조건, 고위험 산업 광고</td>
+                <td>Salesforce Agentforce 8,000개 이상 고객<span class="cite">[5]</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="3-전문가-생산성-영역-소프트웨어-개발법무데이터-분석">
+        <h2>3. 전문가 생산성 영역: 소프트웨어 개발·법무·데이터 분석</h2>
+        <p>
+          반복 운영 업무 다음으로 중요한 적용처는 전문가가 수행하던 지식 작업이다. 이 영역에서 에이전트는 최종 판단자를 대체하기보다,
+          초안 작성, 검색, 검토, 테스트, 요약을 맡아 전문가가 더 빠르게 결론에 도달하도록 돕는다.
+        </p>
+
+        <h3>소프트웨어 개발·DevOps</h3>
+        <p>
+          <strong>소프트웨어 개발·DevOps</strong>에서는 “이슈 티켓 입력 → 코드베이스·문서·테스트 탐색 → 구현 계획 생성 →
+          코드와 테스트 작성 → CI 결과 확인 → 실패 원인 분석 → Pull Request 생성” 흐름이 일반적이다.
+          GitHub의 Copilot 연구에 따르면 Copilot 사용자는 같은 코딩 과제를 55% 더 빠르게 완료했다.
+          설문에서도 개발자의 88%가 생산성 향상을 느꼈고, 77%는 정보 검색 시간이 줄었다고 답했다<span class="cite">[3]</span>.
+        </p>
+        <p>
+          이 수치는 개발 에이전트의 가치가 코드 작성 단계에서 특히 명확하다는 점을 보여준다.
+          반면 대규모 아키텍처 변경, 보안 민감 코드, 프로덕션 자동 배포는 아직 사람의 리뷰가 필수다.
+          Copilot 제품군은 코드 작성, 설명, 리뷰, 테스트 생성 기능을 제공하지만,
+          Pull Request 리뷰 시간 단축률처럼 보편적으로 인용 가능한 정량 수치는 제한적이다<span class="cite">[10]</span>.
+          따라서 개발 영역의 바람직한 도입 방식은 “작은 버그 수정·테스트 생성·문서화는 에이전트가 초안화하고,
+          병합과 배포는 사람이 승인하는 구조”다.
+        </p>
+
+        <div class="chart-card">
+          <h3>GitHub Copilot 연구의 개발자 생산성 지표</h3>
+          <div class="chart-wrap">
+            <canvas id="copilotChart" aria-label="GitHub Copilot 연구의 개발자 생산성 지표 차트"></canvas>
+          </div>
+          <p class="chart-note">
+            동일 코딩 과제 완료 속도 55% 향상, 생산성 향상 체감 88%, 정보 검색 시간 감소 응답 77%<span class="cite">[3]</span>.
+          </p>
+        </div>
+
+        <h3>법무·컴플라이언스</h3>
+        <p>
+          <strong>법무·컴플라이언스</strong>에서는 계약서 입력 후 조항 추출, 사내 플레이북과 비교, 리스크 표시,
+          레드라인 초안 작성, 변호사 검토로 이어지는 워크플로가 대표적이다.
+          Allen &amp; Overy는 Harvey를 전 세계 43개 오피스, 3,500명 이상 변호사에게 제공한다고 발표했다<span class="cite">[11]</span>.
+          Thomson Reuters는 전문직 종사자가 AI로 주당 약 4시간을 절감할 수 있다고 전망한다<span class="cite">[12]</span>.
+          이는 법률 리서치, 계약 검토, 청구서 검증, 규정 준수 점검처럼 시간이 많이 드는 문서 업무에서 에이전트 활용 여지가 크다는 뜻이다.
+        </p>
+        <p>
+          다만 법무는 환각 비용이 큰 분야다. 잘못된 판례 인용, 계약 조항 누락, 규제 신고 오류는 단순 생산성 손실이 아니라 법적 책임으로 이어진다.
+          따라서 법무 에이전트는 원문 링크, 조항별 근거, 버전 관리, 권한 기반 접근, 감사 로그가 필수이며,
+          법률 의견의 최종 제공과 소송 전략 결정은 변호사가 맡아야 한다<span class="cite">[12]</span>.
+        </p>
+
+        <h3>데이터 분석·BI·지식관리</h3>
+        <p>
+          <strong>데이터 분석·BI·지식관리</strong>에서는 사용자의 자연어 질문을 받아 권한을 확인하고,
+          데이터웨어하우스나 사내 문서를 검색한 뒤, 쿼리·차트·요약·출처를 제공하는 방식으로 작동한다.
+          Microsoft 365 Copilot, Power BI Copilot, AWS Q Business 같은 제품군은 이 흐름을 기업용 지식검색과 분석 보조로 확장하고 있다<span class="cite">[10]</span>.
+          이 영역의 효과는 사내 정보가 흩어져 있을수록 커진다. 다만 지표 정의, 조인 조건, 데이터 기준일, 접근권한을 잘못 처리하면
+          그럴듯하지만 틀린 분석이 만들어질 수 있으므로, 중요한 경영 의사결정에는 분석가 검토가 필요하다.
+        </p>
+
+        <div class="chart-card">
+          <h3>전문가 생산성 관련 정량 수치</h3>
+          <div class="chart-wrap">
+            <canvas id="expertStatsChart" aria-label="전문가 생산성 관련 정량 수치 차트"></canvas>
+          </div>
+          <p class="chart-note">
+            Allen &amp; Overy의 Harvey 제공 범위와 Thomson Reuters의 AI 활용 시간 절감 전망을 함께 표시했다<span class="cite">[11][12]</span>.
+          </p>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>전문가 영역</th>
+                <th>에이전트가 잘하는 일</th>
+                <th>사람이 맡아야 하는 일</th>
+                <th>대표 지표</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>소프트웨어 개발</td>
+                <td>코드 초안, 테스트 생성, 코드 설명, CI 실패 요약</td>
+                <td>아키텍처 결정, 보안 리뷰, 병합·배포 승인</td>
+                <td>과제 완료 시간 55% 단축<span class="cite">[3]</span></td>
+              </tr>
+              <tr>
+                <td>법무</td>
+                <td>계약 조항 추출, 플레이북 비교, 리서치 초안</td>
+                <td>법률 의견, 소송 전략, 규제 신고 최종 판단</td>
+                <td>전문직 주당 4시간 절감 전망<span class="cite">[12]</span></td>
+              </tr>
+              <tr>
+                <td>데이터·BI</td>
+                <td>사내 문서 검색, 자연어 질의, 보고서 초안</td>
+                <td>지표 정의, 원인 분석, 경영 판단</td>
+                <td>검색 시간·보고서 작성 시간 단축</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="4-고위험-의사결정-영역-금융헬스케어사이버보안">
+        <h2>4. 고위험 의사결정 영역: 금융·헬스케어·사이버보안</h2>
+        <p>
+          전문가 생산성 영역에서 한 단계 더 나아가면, 에이전트는 규제와 책임이 큰 의사결정 과정에 들어간다.
+          금융, 헬스케어, 사이버보안은 업무량과 복잡성이 커서 AI 에이전트의 가치가 높지만, 잘못된 조치의 비용도 크다.
+          이 영역에서는 “자동화 가능성”보다 “검증 가능한 통제 구조”가 우선이다.
+        </p>
+
+        <h3>금융·보험</h3>
+        <p>
+          <strong>금융·보험</strong>에서는 고객 신청서, 거래 기록, KYC 문서, 외부 제재 리스트, 신용 데이터, 보험 손해 이력 등을 종합해
+          리스크 메모를 만들고 예외를 사람에게 넘기는 흐름이 대표적이다.
+          McKinsey는 생성형 AI가 은행업에서 연간 2,000억~3,400억 달러의 추가 가치를 만들 수 있으며,
+          이는 업계 매출의 2.8~4.7%에 해당한다고 추정했다<span class="cite">[13]</span>.
+          JPMorgan의 COiN 사례도 상업 신용계약서 검토 자동화 사례로 널리 인용되지만,
+          36만 시간 절감 수치는 원문 접근성과 해석에 주의가 필요하다<span class="cite">[14]</span>.
+        </p>
+        <p>
+          금융에서 빠르게 적용할 수 있는 업무는 KYC 문서 검토, AML 조사 보조, 신용 리스크 메모 초안,
+          보험 언더라이팅 자료 정리, 콜센터·백오피스 지원이다. 반면 최종 대출 승인, 보험금 지급 거절,
+          제재 대상 판정, 투자 조언은 설명 가능성, 차별 방지, 모델 리스크 관리, 감사 대응 요건을 충족해야 한다<span class="cite">[13]</span>.
+        </p>
+
+        <div class="chart-card">
+          <h3>은행업에서 생성형 AI의 잠재 추가 가치 추정</h3>
+          <div class="chart-wrap">
+            <canvas id="bankingValueChart" aria-label="은행업 생성형 AI 잠재 가치 추정 차트"></canvas>
+          </div>
+          <p class="chart-note">
+            McKinsey 추정: 연간 2,000억~3,400억 달러 추가 가치, 업계 매출의 2.8~4.7%에 해당<span class="cite">[13]</span>.
+          </p>
+        </div>
+
+        <h3>헬스케어·제약</h3>
+        <p>
+          <strong>헬스케어·제약</strong>에서는 에이전트가 임상시험 프로토콜에서 포함·제외 기준을 추출하고,
+          EHR·검사 결과·진단 기록을 매칭해 후보 환자를 랭킹하며, 연구자가 최종 검토하는 흐름이 가능하다.
+          TrialX는 임상시험의 약 86%가 등록 목표를 제때 달성하지 못한다고 설명하며, 에이전틱 AI가 프로토콜 검토,
+          환자 데이터 분석, 맞춤형 아웃리치, 사이트별 모집 지연 감지에 활용될 수 있다고 정리한다<span class="cite">[15]</span>.
+          Microsoft Dragon Copilot은 진료 대화를 바탕으로 임상 노트를 생성해 의료진의 문서 작성 부담을 줄이는 방향으로 제품화되어 있다<span class="cite">[16]</span>.
+        </p>
+        <p>
+          이 영역의 경계는 분명하다. 환자 모집 후보 탐색, 의료 문서 요약, 보험 사전승인, 진료 예약,
+          임상시험 문서 초안은 에이전트 보조에 적합하다. 그러나 진단, 처방, 치료 결정, 임상시험 최종 적격성 판정은
+          의료진의 책임 아래 이뤄져야 한다. 특히 환자에게 직접 제공되는 고위험 의료 조언은 근거 제시와 안전 검토 없이는 자동화하기 어렵다<span class="cite">[16]</span>.
+        </p>
+
+        <h3>사이버보안·SOC</h3>
+        <p>
+          <strong>사이버보안·SOC</strong>에서는 “SIEM·EDR 경보 수집 → 자산 중요도와 사용자 행동 조회 → 위협 인텔리전스 검색 →
+          위험도 분류 → 티켓 작성 또는 대응 플레이북 제안 → 분석가 승인”이 핵심 흐름이다.
+          Microsoft Security Copilot의 무작위 통제 실험에서는 사용자가 보안 작업을 평균 22% 더 빠르게 수행했고,
+          정확도는 7% 높았다<span class="cite">[4]</span>. IBM/Ponemon 조사도 보안 AI와 자동화를 광범위하게 활용한 조직은
+          그렇지 않은 조직보다 데이터 침해 비용을 평균 193만 달러 절감했다고 제시한다<span class="cite">[17]</span>.
+        </p>
+        <p>
+          하지만 보안은 에이전틱 AI의 양면성이 가장 뚜렷한 분야다. 같은 기술이 방어뿐 아니라 정찰, 취약점 악용,
+          사회공학, 공격 자동화에도 쓰일 수 있다. 조사 논문은 프롬프트 인젝션, 도구 호출 오남용, 메모리 오염,
+          에이전트 간 공모, 연쇄 장애, 감독 회피 같은 위험을 지적한다<span class="cite">[7]</span>.
+          따라서 경보 요약, 피싱 분석, 위협 인텔 수집은 빠르게 도입할 수 있지만,
+          계정 폐쇄, 네트워크 격리, 방화벽·IAM 정책 변경은 승인 기반으로 운영해야 한다.
+        </p>
+
+        <div class="grid two">
+          <div class="chart-card">
+            <h3>보안 AI 활용 효과</h3>
+            <div class="chart-wrap">
+              <canvas id="securityChart" aria-label="Microsoft Security Copilot 및 IBM 보안 AI 효과 차트"></canvas>
+            </div>
+            <p class="chart-note">
+              Microsoft Security Copilot 실험의 작업 속도·정확도 향상과 IBM/Ponemon의 데이터 침해 비용 절감액을 표시했다<span class="cite">[4][17]</span>.
+            </p>
+          </div>
+
+          <div class="chart-card">
+            <h3>헬스케어·금융 고위험 지표</h3>
+            <div class="chart-wrap">
+              <canvas id="highRiskChart" aria-label="임상시험 등록 목표 미달과 금융 매출 가치 비율 차트"></canvas>
+            </div>
+            <p class="chart-note">
+              TrialX의 임상시험 등록 목표 미달 비율 86%와 McKinsey의 은행업 매출 대비 잠재 가치 2.8~4.7% 범위를 함께 표시했다<span class="cite">[13][15]</span>.
+            </p>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>고위험 도메인</th>
+                <th>적합한 보조 업무</th>
+                <th>승인 없이는 위험한 업무</th>
+                <th>통제 포인트</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>금융·보험</td>
+                <td>KYC, AML 조사 보조, 신용 메모 초안, 언더라이팅 자료 정리</td>
+                <td>대출 승인, 보험금 거절, 제재 판정, 투자 조언</td>
+                <td>설명 가능성, 감사 로그, 편향 점검</td>
+              </tr>
+              <tr>
+                <td>헬스케어·제약</td>
+                <td>환자 모집 후보 탐색, 문서화, 사전승인, 임상 문서 초안</td>
+                <td>진단, 처방, 치료 결정, 최종 적격성 판정</td>
+                <td>의료진 검토, 근거 표시, 개인정보 보호</td>
+              </tr>
+              <tr>
+                <td>사이버보안</td>
+                <td>경보 요약, 피싱 분석, 취약점 우선순위, 보고서 초안</td>
+                <td>자동 차단, 계정 폐쇄, 권한 변경, 공격 시뮬레이션</td>
+                <td>샌드박스, 권한 제한, 플레이북 승인</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="5-물리-세계와-운영-최적화-영역-제조공급망물류">
+        <h2>5. 물리 세계와 운영 최적화 영역: 제조·공급망·물류</h2>
+        <p>
+          고위험 의사결정이 디지털 책임 문제를 만든다면, 제조·공급망·물류는 에이전트가 물리 세계의 운영에 영향을 준다는 점에서
+          별도의 주의가 필요하다. 이 영역의 워크플로는 주문, 재고, 센서, 설비, 운송 데이터를 바탕으로 이상 징후를 탐지하고,
+          수요·경로·정비 일정을 제안한 뒤, 담당자 승인 후 ERP·WMS·TMS에 반영하는 방식이다.
+        </p>
+        <p>
+          물류 고객지원에서는 에이전트 도입이 비교적 쉽다. CSX의 “Chessie” 같은 AI assistant는 고객이 자연어로 화물 추적,
+          선적 관리, 물류 서비스 정보를 물어보면 여러 백엔드 시스템에서 정보를 가져와 답하는 형태로 알려져 있다<span class="cite">[18]</span>.
+          이런 사례는 고객지원과 물류 운영의 중간 지점에 있다. 고객은 포털 메뉴를 찾지 않고도 상태를 확인할 수 있고,
+          기업은 반복 문의를 줄일 수 있다.
+        </p>
+        <p>
+          제조 현장에서는 예방정비, 품질 이상 탐지, 작업자 지식검색, 부품 재고 질의가 우선 적용 대상이다.
+          다만 자동 발주, 생산 중단, 설비 제어, 안전 관련 작업 지시는 신중해야 한다. 잘못된 조치가 재고 과잉이나 납기 지연을 넘어
+          안전사고로 이어질 수 있기 때문이다. 따라서 제조·물류 에이전트는 제안과 실행을 분리하고,
+          실행 전 시뮬레이션·승인·롤백 절차를 갖추는 것이 바람직하다.
+        </p>
+
+        <div class="chart-card">
+          <h3>제조·공급망·물류 업무별 자동화 위험도</h3>
+          <div class="chart-wrap">
+            <canvas id="physicalOpsChart" aria-label="제조 공급망 물류 업무별 자동화 위험도 차트"></canvas>
+          </div>
+          <p class="chart-note">
+            표의 자동화 수준을 낮은 위험, 중간 위험, 중간~높은 위험, 높은 위험의 순서형 점수로 시각화했다.
+          </p>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>업무 유형</th>
+                <th>대표 입력</th>
+                <th>에이전트 역할</th>
+                <th>자동화 수준</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>배송·물류 문의</td>
+                <td>주문번호, 선적 정보, 고객 질문</td>
+                <td>실시간 상태 조회와 답변 생성</td>
+                <td><span class="risk-low">낮은 위험: 자동 응답 가능</span></td>
+              </tr>
+              <tr>
+                <td>재고·수요 대응</td>
+                <td>판매, 재고, 리드타임, 공급 지연</td>
+                <td>재고 부족 예측, 보충 제안</td>
+                <td><span class="risk-mid">중간 위험: 담당자 승인 권장</span></td>
+              </tr>
+              <tr>
+                <td>예방정비</td>
+                <td>센서, 설비 이력, 고장 로그</td>
+                <td>이상 탐지, 정비 일정 제안</td>
+                <td><span class="risk-mid">중간~높은 위험: 현장 검토 필요</span></td>
+              </tr>
+              <tr>
+                <td>설비 제어·생산 중단</td>
+                <td>제어 신호, 안전 규정, 생산 계획</td>
+                <td>원인 분석과 권고</td>
+                <td><span class="risk-high">높은 위험: 자동 실행 제한</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="6-도입-원칙과-우선순위-자동화율보다-안전한-완결률">
+        <h2>6. 도입 원칙과 우선순위: 자동화율보다 안전한 완결률</h2>
+        <p>
+          도메인별 사례를 종합하면, 에이전틱 워크플로 도입의 핵심은 “어디까지 자동화할 것인가”를 업무 위험도에 맞춰 단계적으로 정하는 것이다.
+          고객지원과 서비스데스크처럼 고빈도·저위험 업무는 빠른 자동화가 가능하지만, 금융·의료·법무·보안·제조 제어처럼 오류 비용이 큰 업무는
+          사람의 승인과 감사 체계를 먼저 설계해야 한다.
+        </p>
+        <p>권장 도입 순서는 다음과 같다.</p>
+
+        <div class="chart-card">
+          <h3>단계별 자동화 수준과 실행 통제</h3>
+          <div class="chart-wrap">
+            <canvas id="adoptionStageChart" aria-label="에이전틱 워크플로 도입 단계별 자동화 수준 차트"></canvas>
+          </div>
+          <p class="chart-note">
+            1단계 읽기·검색·요약에서 5단계 폐쇄 루프 자동화까지 자동화 수준이 높아질수록 권한, 승인, 감사, 롤백 요건도 함께 강화되어야 한다.
+          </p>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>단계</th>
+                <th>자동화 수준</th>
+                <th>예시 업무</th>
+                <th>성공 기준</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1단계</td>
+                <td>읽기·검색·요약</td>
+                <td>사내 문서 검색, 회의록, 티켓 요약, 코드 설명</td>
+                <td>검색 시간 단축, 근거 링크 정확도</td>
+              </tr>
+              <tr>
+                <td>2단계</td>
+                <td>초안 작성·추천</td>
+                <td>이메일, 계약 검토 초안, 리스크 메모, 테스트 코드</td>
+                <td>인간 검토 통과율, 수정률 감소</td>
+              </tr>
+              <tr>
+                <td>3단계</td>
+                <td>제한된 실행</td>
+                <td>CRM 업데이트, 티켓 생성, 예약 변경, 권한 요청 제출</td>
+                <td>업무 완수율, 롤백 가능성, 이관율</td>
+              </tr>
+              <tr>
+                <td>4단계</td>
+                <td>승인 기반 실행</td>
+                <td>환불 처리, 보안 플레이북, 금융·법무 예외 처리</td>
+                <td>승인 로그, 정책 준수율, 사고율</td>
+              </tr>
+              <tr>
+                <td>5단계</td>
+                <td>폐쇄 루프 자동화</td>
+                <td>충분히 검증된 저위험 반복 업무</td>
+                <td>자동 해결률, 고객만족도, 오류율</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          성과 평가는 단순 정확도만으로는 부족하다. 에이전틱 워크플로는 실제 시스템을 움직이기 때문에 업무 완수율,
+          평균 처리 시간, 비용 절감, 이관율, 환각률, 고객만족도, 보안 사고, 규제 위반, 인간 검토 통과율을 함께 봐야 한다.
+          특히 고객지원의 Klarna 사례처럼 큰 성과가 있더라도, 이후 인간 상담 보강이 필요했다는 점은 운영 지표가
+          “자동화율” 하나여서는 안 된다는 사실을 보여준다<span class="cite">[1][2]</span>.
+        </p>
+        <p>
+          결론적으로, 에이전틱 워크플로는 모든 도메인에 동일하게 적용되는 만능 자동화가 아니다.
+          <strong>가장 먼저 자동화할 업무는 반복적이고 되돌릴 수 있으며, 데이터와 절차가 명확한 업무</strong>다.
+          <strong>가장 늦게 자동화할 업무는 사람의 권리, 안전, 재산, 규제 책임에 직접 영향을 주는 최종 판단</strong>이다.
+          따라서 기업은 AI 에이전트를 “인력을 대체하는 챗봇”이 아니라, 업무 시스템 위에서 작동하는
+          <strong>통제 가능한 실행 레이어</strong>로 설계해야 한다. 이 관점에서 고객지원·서비스데스크·영업 운영은 빠른 확산 영역이고,
+          금융·헬스케어·법무·보안·제조 제어는 높은 ROI에도 불구하고 승인·감사·권한 통제를 전제로 추진해야 한다.
+        </p>
+      </section>
+    </main>
+
+    <section class="sources" id="sources">
+      <h2>출처</h2>
+      <ol>
+        <li>
+          Klarna, <em>Klarna AI assistant handles two-thirds of customer service chats in its first month</em>:
+          <a href="https://www.klarna.com/international/press/klarna-ai-assistant-handles-two-thirds-of-customer-service-chats-in-its-first-month/" target="_blank" rel="noopener">https://www.klarna.com/international/press/klarna-ai-assistant-handles-two-thirds-of-customer-service-chats-in-its-first-month/</a>
+        </li>
+        <li>
+          Reuters, <em>Klarna says it is bringing back some human customer service roles after AI push</em>:
+          <a href="https://www.reuters.com/technology/artificial-intelligence/klarna-says-it-bringing-back-some-human-customer-service-roles-after-ai-push-2025-05-08/" target="_blank" rel="noopener">https://www.reuters.com/technology/artificial-intelligence/klarna-says-it-bringing-back-some-human-customer-service-roles-after-ai-push-2025-05-08/</a>
+        </li>
+        <li>
+          GitHub Blog, <em>Research: quantifying GitHub Copilot’s impact on developer productivity and happiness</em>:
+          <a href="https://github.blog/news-insights/research/research-quantifying-github-copilots-impact-on-developer-productivity-and-happiness/" target="_blank" rel="noopener">https://github.blog/news-insights/research/research-quantifying-github-copilots-impact-on-developer-productivity-and-happiness/</a>
+        </li>
+        <li>
+          Microsoft, <em>Randomized controlled trial for Microsoft Security Copilot / Economic report</em>:
+          <a href="https://cdn-dynmedia-1.microsoft.com/is/content/microsoftcorp/microsoft/final/en-us/microsoft-brand/documents/microsoft_security_copilot_economic_report_v4_accessible.pdf" target="_blank" rel="noopener">https://cdn-dynmedia-1.microsoft.com/is/content/microsoftcorp/microsoft/final/en-us/microsoft-brand/documents/microsoft_security_copilot_economic_report_v4_accessible.pdf</a>
+        </li>
+        <li>
+          Salesforce, <em>Salesforce introduces Agentforce flexible pricing</em>:
+          <a href="https://www.salesforce.com/news/press-releases/2025/05/15/agentforce-flexible-pricing-news/" target="_blank" rel="noopener">https://www.salesforce.com/news/press-releases/2025/05/15/agentforce-flexible-pricing-news/</a>
+        </li>
+        <li>
+          ServiceNow, <em>ServiceNow AI Agents</em>:
+          <a href="https://www.servicenow.com/products/ai-agents.html" target="_blank" rel="noopener">https://www.servicenow.com/products/ai-agents.html</a>
+        </li>
+        <li>
+          <em>A Survey of Agentic AI and Cybersecurity: Challenges, Opportunities and Use-case Prototypes</em>:
+          <a href="https://arxiv.org/html/2601.05293v1" target="_blank" rel="noopener">https://arxiv.org/html/2601.05293v1</a>
+        </li>
+        <li>
+          Moveworks, <em>Customer stories</em>:
+          <a href="https://www.moveworks.com/us/en/resources/customer-stories" target="_blank" rel="noopener">https://www.moveworks.com/us/en/resources/customer-stories</a>
+        </li>
+        <li>
+          Kellton, <em>Top 10 Agentic AI use cases transforming businesses</em>:
+          <a href="https://www.kellton.com/kellton-tech-blog/top-10-agentic-ai-use-cases-2026" target="_blank" rel="noopener">https://www.kellton.com/kellton-tech-blog/top-10-agentic-ai-use-cases-2026</a>
+        </li>
+        <li>
+          GitHub, <em>GitHub Copilot</em>:
+          <a href="https://github.com/features/copilot" target="_blank" rel="noopener">https://github.com/features/copilot</a>
+        </li>
+        <li>
+          A&amp;O Shearman, <em>A&amp;O announces exclusive launch partnership with Harvey</em>:
+          <a href="https://www.aoshearman.com/en/news/ao-announces-exclusive-launch-partnership-with-harvey" target="_blank" rel="noopener">https://www.aoshearman.com/en/news/ao-announces-exclusive-launch-partnership-with-harvey</a>
+        </li>
+        <li>
+          Thomson Reuters, <em>Future of Professionals Report</em>:
+          <a href="https://www.thomsonreuters.com/en/reports/future-of-professionals.html" target="_blank" rel="noopener">https://www.thomsonreuters.com/en/reports/future-of-professionals.html</a>
+        </li>
+        <li>
+          McKinsey, <em>The economic potential of generative AI: The next productivity frontier</em>:
+          <a href="https://www.mckinsey.com/capabilities/mckinsey-digital/our-insights/the-economic-potential-of-generative-ai-the-next-productivity-frontier" target="_blank" rel="noopener">https://www.mckinsey.com/capabilities/mckinsey-digital/our-insights/the-economic-potential-of-generative-ai-the-next-productivity-frontier</a>
+        </li>
+        <li>
+          JPMorgan, <em>Artificial intelligence and machine learning at JPMorgan Chase</em>:
+          <a href="https://www.jpmorgan.com/technology/artificial-intelligence" target="_blank" rel="noopener">https://www.jpmorgan.com/technology/artificial-intelligence</a>
+        </li>
+        <li>
+          TrialX, <em>Understanding Agentic AI: How It’s Changing the Landscape of Clinical Trials</em>:
+          <a href="https://trialx.com/understanding-agentic-ai-how-its-changing-the-landscape-of-clinical-trials" target="_blank" rel="noopener">https://trialx.com/understanding-agentic-ai-how-its-changing-the-landscape-of-clinical-trials</a>
+        </li>
+        <li>
+          Microsoft, <em>Microsoft Dragon Copilot</em>:
+          <a href="https://www.microsoft.com/en-us/industry/health/microsoft-dragon-copilot" target="_blank" rel="noopener">https://www.microsoft.com/en-us/industry/health/microsoft-dragon-copilot</a>
+        </li>
+        <li>
+          IBM, <em>Cost of a Data Breach Report</em>:
+          <a href="https://www.ibm.com/reports/data-breach" target="_blank" rel="noopener">https://www.ibm.com/reports/data-breach</a>
+        </li>
+        <li>
+          Microsoft Customer Stories, <em>CSX / Chessie AI assistant customer story</em>:
+          <a href="https://customers.microsoft.com/" target="_blank" rel="noopener">https://customers.microsoft.com/</a>
+        </li>
+      </ol>
+    </section>
+  </div>
+
+  <script>
+    Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", Roboto, Arial, sans-serif';
+    Chart.defaults.color = '#475467';
+    Chart.defaults.plugins.legend.labels.boxWidth = 14;
+    Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(16, 24, 40, 0.92)';
+    Chart.defaults.plugins.tooltip.padding = 12;
+    Chart.defaults.plugins.tooltip.cornerRadius = 10;
+
+    const gridColor = 'rgba(148, 163, 184, 0.22)';
+    const blue = '#2454d6';
+    const teal = '#0f766e';
+    const amber = '#f59e0b';
+    const red = '#dc2626';
+    const purple = '#7c3aed';
+
+    new Chart(document.getElementById('klarnaChart'), {
+      type: 'bar',
+      data: {
+        labels: ['AI 담당 채팅 비중(%)', '출시 첫 달 대화(백만 건)', '상담원 상당 업무량(백 명)', '해결 시간: 기존(분)', '해결 시간: AI 후(분 미만)'],
+        datasets: [{
+          label: 'Klarna 발표 수치',
+          data: [66.7, 2.3, 7, 11, 2],
+          backgroundColor: [blue, teal, purple, amber, red],
+          borderRadius: 10
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: { color: gridColor },
+            ticks: { precision: 0 }
+          },
+          x: {
+            grid: { display: false },
+            ticks: { maxRotation: 0, autoSkip: false }
+          }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function(ctx) {
+                const labels = [
+                  '전체 고객서비스 채팅의 약 3분의 2',
+                  '230만 건',
+                  '정규직 상담원 700명 상당',
+                  '기존 평균 11분',
+                  '2분 미만'
+                ];
+                return labels[ctx.dataIndex];
+              }
+            }
+          }
+        }
+      }
+    });
+
+    new Chart(document.getElementById('roiOpsChart'), {
+      type: 'bar',
+      data: {
+        labels: ['영업 담당자 수동 잠재고객 발굴 시간(중간값 %)', 'Agentforce 고객 수(천 개 이상)', 'AI·Data Cloud 매출(억 달러)', 'Klarna 첫 달 대화(백만 건)'],
+        datasets: [{
+          label: '대표 지표',
+          data: [45, 8, 9, 2.3],
+          backgroundColor: [amber, blue, teal, purple],
+          borderRadius: 10
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: { beginAtZero: true, grid: { color: gridColor } },
+          x: { grid: { display: false }, ticks: { maxRotation: 0, autoSkip: false } }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function(ctx) {
+                const text = [
+                  '40~50% 범위의 중간값',
+                  '8,000개 이상 고객',
+                  '출시 후 6개월 내 9억 달러 규모',
+                  '230만 건'
+                ];
+                return text[ctx.dataIndex];
+              }
+            }
+          }
+        }
+      }
+    });
+
+    new Chart(document.getElementById('copilotChart'), {
+      type: 'bar',
+      data: {
+        labels: ['동일 과제 완료 속도 향상', '생산성 향상 체감', '정보 검색 시간 감소'],
+        datasets: [{
+          label: '비율(%)',
+          data: [55, 88, 77],
+          backgroundColor: [blue, teal, purple],
+          borderRadius: 10
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            beginAtZero: true,
+            max: 100,
+            grid: { color: gridColor },
+            ticks: { callback: value => value + '%' }
+          },
+          y: { grid: { display: false } }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: ctx => ctx.raw + '%' } }
+        }
+      }
+    });
+
+    new Chart(document.getElementById('expertStatsChart'), {
+      type: 'bar',
+      data: {
+        labels: ['Harvey 제공 오피스 수', 'Harvey 제공 변호사 수(천 명 이상)', 'AI 활용 주당 절감 시간'],
+        datasets: [{
+          label: '전문가 생산성 관련 수치',
+          data: [43, 3.5, 4],
+          backgroundColor: [blue, teal, amber],
+          borderRadius: 10
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: { beginAtZero: true, grid: { color: gridColor } },
+          x: { grid: { display: false }, ticks: { maxRotation: 0, autoSkip: false } }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function(ctx) {
+                const text = ['43개 오피스', '3,500명 이상 변호사', '주당 약 4시간 절감 전망'];
+                return text[ctx.dataIndex];
+              }
+            }
+          }
+        }
+      }
+    });
+
+    new Chart(document.getElementById('bankingValueChart'), {
+      type: 'bar',
+      data: {
+        labels: ['연간 추가 가치 하한(억 달러)', '연간 추가 가치 상한(억 달러)', '매출 대비 하한(%)', '매출 대비 상한(%)'],
+        datasets: [{
+          label: 'McKinsey 추정',
+          data: [2000, 3400, 2.8, 4.7],
+          backgroundColor: [blue, teal, amber, purple],
+          borderRadius: 10
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: { beginAtZero: true, grid: { color: gridColor } },
+          x: { grid: { display: false }, ticks: { maxRotation: 0, autoSkip: false } }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function(ctx) {
+                const text = [
+                  '2,000억 달러',
+                  '3,400억 달러',
+                  '업계 매출의 2.8%',
+                  '업계 매출의 4.7%'
+                ];
+                return text[ctx.dataIndex];
+              }
+            }
+          }
+        }
+      }
+    });
+
+    new Chart(document.getElementById('securityChart'), {
+      type: 'bar',
+      data: {
+        labels: ['Security Copilot 작업 속도 향상(%)', 'Security Copilot 정확도 향상(%)', '데이터 침해 비용 절감(백만 달러)'],
+        datasets: [{
+          label: '보안 AI 효과',
+          data: [22, 7, 1.93],
+          backgroundColor: [blue, teal, amber],
+          borderRadius: 10
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: { beginAtZero: true, grid: { color: gridColor } },
+          x: { grid: { display: false }, ticks: { maxRotation: 0, autoSkip: false } }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function(ctx) {
+                const text = ['22% 더 빠르게 수행', '정확도 7% 향상', '평균 193만 달러 절감'];
+                return text[ctx.dataIndex];
+              }
+            }
+          }
+        }
+      }
+    });
+
+    new Chart(document.getElementById('highRiskChart'), {
+      type: 'bar',
+      data: {
+        labels: ['임상시험 등록 목표 미달(%)', '은행업 매출 대비 AI 가치 하한(%)', '은행업 매출 대비 AI 가치 상한(%)'],
+        datasets: [{
+          label: '고위험 도메인 관련 비율',
+          data: [86, 2.8, 4.7],
+          backgroundColor: [red, blue, teal],
+          borderRadius: 10
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 100,
+            grid: { color: gridColor },
+            ticks: { callback: value => value + '%' }
+          },
+          x: { grid: { display: false }, ticks: { maxRotation: 0, autoSkip: false } }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: ctx => ctx.raw + '%' } }
+        }
+      }
+    });
+
+    new Chart(document.getElementById('physicalOpsChart'), {
+      type: 'radar',
+      data: {
+        labels: ['배송·물류 문의', '재고·수요 대응', '예방정비', '설비 제어·생산 중단'],
+        datasets: [{
+          label: '자동화 위험도 점수',
+          data: [1, 2, 3, 4],
+          backgroundColor: 'rgba(220, 38, 38, 0.15)',
+          borderColor: red,
+          pointBackgroundColor: red,
+          pointBorderColor: '#fff',
+          pointHoverBackgroundColor: '#fff',
+          pointHoverBorderColor: red
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          r: {
+            beginAtZero: true,
+            min: 0,
+            max: 4,
+            ticks: {
+              stepSize: 1,
+              callback: function(value) {
+                return ['', '낮음', '중간', '중간~높음', '높음'][value] || value;
+              }
+            },
+            grid: { color: gridColor },
+            angleLines: { color: gridColor }
+          }
+        },
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: function(ctx) {
+                const text = ['낮은 위험: 자동 응답 가능', '중간 위험: 담당자 승인 권장', '중간~높은 위험: 현장 검토 필요', '높은 위험: 자동 실행 제한'];
+                return text[ctx.dataIndex];
+              }
+            }
+          }
+        }
+      }
+    });
+
+    new Chart(document.getElementById('adoptionStageChart'), {
+      type: 'line',
+      data: {
+        labels: ['1단계 읽기·검색·요약', '2단계 초안·추천', '3단계 제한된 실행', '4단계 승인 기반 실행', '5단계 폐쇄 루프 자동화'],
+        datasets: [
+          {
+            label: '자동화 수준',
+            data: [1, 2, 3, 4, 5],
+            borderColor: blue,
+            backgroundColor: 'rgba(36, 84, 214, 0.15)',
+            tension: 0.35,
+            fill: true,
+            pointRadius: 5,
+            pointBackgroundColor: blue
+          },
+          {
+            label: '필요 통제 수준',
+            data: [1, 2, 3.5, 4.5, 5],
+            borderColor: red,
+            backgroundColor: 'rgba(220, 38, 38, 0.08)',
+            tension: 0.35,
+            fill: true,
+            pointRadius: 5,
+            pointBackgroundColor: red
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 5,
+            grid: { color: gridColor },
+            ticks: { stepSize: 1 }
+          },
+          x: {
+            grid: { display: false },
+            ticks: { maxRotation: 0, autoSkip: false }
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>
