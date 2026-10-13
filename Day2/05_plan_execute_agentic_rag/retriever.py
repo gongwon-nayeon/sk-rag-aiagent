@@ -86,6 +86,14 @@ def setup_retriever():
             if key in doc_by_key
         ]
         docstore.mset(full_docs)
+
+        # dataset에 새로 추가된 PDF만 증분 임베딩 (파일명 기준)
+        indexed_sources = {source for source, _ in key_by_doc_id.values()}
+        new_docs = [d for d in docs if d.metadata["source"] not in indexed_sources]
+        if new_docs:
+            new_sources = sorted({d.metadata["source"] for d in new_docs})
+            print(f"새 PDF {len(new_sources)}개 발견, 증분 임베딩 중: {new_sources}")
+            parent_retriever.add_documents(new_docs)
     else:
         # 문서 추가
         print(f"'{collection_name}' 컬렉션이 없어 새로 생성합니다. 문서를 벡터스토어에 추가 중...")
